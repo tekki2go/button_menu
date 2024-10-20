@@ -7,6 +7,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.filechooser import FileChooserListView
+from kivy.uix.filechooser import FileChooserIconView
 from kivy.uix.popup import Popup
 from kivy.core.window import Window
 import yaml
@@ -125,22 +126,25 @@ class ConfigBuilderApp(App):
 
     def show_load_popup(self, instance):
         content = BoxLayout(orientation='vertical', padding=10, spacing=10)
-        filename_input = TextInput(hint_text='Enter filename', multiline=False)
-        content.add_widget(filename_input)
+        filechooser = FileChooserIconView(path='config', filters=['*.yaml'])
+        content.add_widget(filechooser)
 
         load_btn = Button(text='Load', size_hint_y=None, height='40dp')
         content.add_widget(load_btn)
 
-        popup = Popup(title='Load Config', content=content, size_hint=(0.7, 0.5))
-        load_btn.bind(on_press=lambda x: self.load_config(filename_input.text, popup))
+        popup = Popup(title='Load Config', content=content, size_hint=(0.9, 0.9))
+        load_btn.bind(on_press=lambda x: self.lambda x: self.load_config(filechooser.selection, popup))
         popup.open()
 
-    def load_config(self, filename, popup):
-        if not filename.endswith('.yaml'):
-            filename += '.yaml'
-        filepath = os.path.join('config', filename)
+    def load_config(self, selection, popup):
+        if not selection:
+            print("No file selected")
+            popup.dismiss()
+            return
 
-        if not os.path.exists(filepath):
+        filepath = selection[0] if selection else None
+
+        if not filepath or not os.path.exists(filepath):
             print(f"Configuration file {filepath} not found")
             popup.dismiss()
             return
