@@ -40,6 +40,11 @@ class ConfigBuilderApp(App):
         save_btn.bind(on_press=self.show_save_popup)
         self.root.add_widget(save_btn)
 
+        # Button to load configuration
+        load_btn = Button(text='Load Config', size_hint=(1, 0.1))
+        load_btn.bind(on_press=self.show_load_popup)
+        self.root.add_widget(load_btn)
+
         return self.root
 
     def add_brick(self, brick_type):
@@ -118,6 +123,18 @@ class ConfigBuilderApp(App):
         save_btn.bind(on_press=lambda x: self.save_config(filename_input.text, popup))
         popup.open()
 
+    def show_load_popup(self, instance):
+        filechooser = FileChooserListView(path='config', size_hint=(1, 0.8))
+        load_btn = Button(text='Load', size_hint=(1, 0.1))
+
+        content = BoxLayout(orientation='vertical')
+        content.add_widget(filechooser)
+        content.add_widget(load_btn)
+
+        popup = Popup(title='Load Config', content=content, size_hint=(0.9, 0.9))
+        load_btn.bind(on_press=lambda x: self.load_config(filechooser.path, filechooser.selection, popup))
+        popup.open()
+
     def save_config(self, filename, popup):
         if not filename.endswith('.yaml'):
             filename += '.yaml'
@@ -126,7 +143,6 @@ class ConfigBuilderApp(App):
         filepath = os.path.join('config', filename)
 
         config = {'actions': []}
-        action_index = 0
 
         for brick in self.brick_container.children[::-1]:  # Iterate from top to bottom
             if hasattr(brick, 'brick_type') and brick.brick_type == 'delay':
@@ -161,9 +177,46 @@ class ConfigBuilderApp(App):
 
         # Save to YAML file
         with open(filepath, 'w') as outfile:
-            yaml.dump(config, outfile, default_flow_style=False)
+            yaml.dump(config, outfile, default_flow_style=False, sort_keys=False)
 
         print(f"Configuration saved to {filepath}")
+        popup.dismiss()
+
+    def load_config(self, path, selection, popup):
+        if not selection:
+            print("No file selected.")
+            return
+
+        filepath = selection[0]
+        with open(filepath, 'r') as infile:
+            config = yaml.safe_load(infile)
+
+        # Clear existing bricks
+        self.brick_container.clear_widgets()
+
+        # Load bricks from config
+        for action in config.get('actions', []):
+            if action['type'] == 'delay':
+                self.add_brick('delay')
+                brick = self.brick_container.children[0]
+                delay_input = next((child for child in brick.children if getattr(child, 'widget_type', None) == 'delay_input'), None)
+                time_type_spinner = next((child for child in brick.children if getattr(child, 'widget_type', None) == 'time_type_spinner'), None)
+                if delay_input and time_type_spinner:
+                    delay_input.text = str(action['amount'])
+                    time_type_spinner.text = 'Seconds' if action['unit'] == 'sec' else 'Minutes'
+            elif action['type'] == 'action':
+                self.add_brick('start_stop')
+                brick = self.brick_container.children[0]
+                action_spinner = next((child for child in brick.children if getattr(child, 'widget_type', None) == 'action_spinner'), None)
+                device_spinner = next((child for child in brick.children if getattr(child, 'widget_type', None) == 'device_spinner'), None)
+                level_spinner = next((child for child in brick.children if getattr(child, 'widget_type', None) == 'level_spinner'), None)
+                if action_spinner and device_spinner:
+                    action_spinner.text = action['action_type'].capitalize()
+                    device_spinner.text = action['device']
+                    if 'level' in action and level_spinner:
+                        level_spinner.text = action['level'].capitalize()
+
+        print(f"Configuration loaded from {filepath}")
         popup.dismiss()
 
 if __name__ == '__main__':

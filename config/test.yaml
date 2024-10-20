@@ -1,8 +1,25 @@
 actions:
 - action_type: start
+  device: Steam
+  level: min
+  type: action
+- amount: 10
+  type: delay
+  unit: sec
+- action_type: start
   device: Hotwater
   level: med
   type: action
 - amount: 10
   type: delay
-  unit: min
+  unit: sec
+- action_type: start
+  device: Vacuum
+  level: max
+  type: action
+- amount: 30
+  type: delay
+  unit: sec
+- action_type: stop
+  device: All
+  type: action
