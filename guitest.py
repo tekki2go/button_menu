@@ -133,7 +133,7 @@ class ConfigBuilderApp(App):
         content.add_widget(load_btn)
 
         popup = Popup(title='Load Config', content=content, size_hint=(0.9, 0.9))
-        load_btn.bind(on_press=lambda x: self.lambda x: self.load_config(filechooser.selection, popup))
+        load_btn.bind(on_press=lambda x: self.load_config(filechooser.selection, popup))
         popup.open()
 
     def load_config(self, selection, popup):
