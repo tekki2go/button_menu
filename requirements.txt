@@ -1,2 +1,4 @@
 PyYAML
 pigpio
+kivy[full]
+kivy_garden.drag_n_drop
