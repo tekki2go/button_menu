@@ -1,0 +1,10 @@
+c1:
+- delay: startm
+- delay: 5s
+- delay: startm
+- delay: 5s
+- delay: startm
+- delay: 20s
+- delay: stopm
+- delay: stopm
+- delay: stopm
