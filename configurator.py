@@ -6,7 +6,7 @@ from kivy.uix.spinner import Spinner
 from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.popup import Popup
-from kivy.uix.filechooser import FileChooserIconView  # Added import
+from kivy.uix.filechooser import FileChooserIconView  # Ensure this import is present
 from kivy.core.window import Window
 import yaml
 import os
@@ -67,6 +67,27 @@ class ConfigBuilderApp(App):
             level_spinner = Spinner(text='Select Level', values=('Min', 'Med', 'Max'), size_hint_x=0.3)
             brick.add_widget(level_spinner)
             level_spinner.widget_type = 'level_spinner'
+
+            # Initially hide the level_spinner since "Select Action" is not "start"
+            level_spinner.opacity = 0
+            level_spinner.size_hint_x = 0
+
+            # Define a callback to show/hide level_spinner based on action selection
+            def on_action_change(spinner, text):
+                if text.lower() == 'start':
+                    level_spinner.opacity = 1
+                    level_spinner.size_hint_x = 0.3
+                elif text.lower() == 'stop':
+                    level_spinner.opacity = 0
+                    level_spinner.size_hint_x = 0
+                else:
+                    # For "Select Action" or any other unexpected value
+                    level_spinner.opacity = 0
+                    level_spinner.size_hint_x = 0
+
+            # Bind the callback to the action_spinner
+            action_spinner.bind(text=on_action_change)
+
         elif brick_type == 'delay':
             # Delay Time Input
             delay_input = TextInput(hint_text='Delay (0-1000)', size_hint_x=0.2, input_filter='int')
@@ -183,6 +204,9 @@ class ConfigBuilderApp(App):
                     device_spinner.text = action['device']
                     if level_spinner and 'level' in action:
                         level_spinner.text = action['level'].capitalize()
+                    else:
+                        # If action_type is 'stop', ensure level_spinner is hidden
+                        level_spinner.text = 'Select Level'  # Reset to default
 
         popup.dismiss()
 
