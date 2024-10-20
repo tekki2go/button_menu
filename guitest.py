@@ -119,36 +119,37 @@ class ConfigBuilderApp(App):
             os.makedirs('config')
         filepath = os.path.join('config', filename)
 
-        config = {}
-        config['actions'] = []
+        config = {'actions': {}}
+        action_index = 0
 
         for brick in self.brick_container.children[::-1]:  # Iterate from top to bottom
             if len(brick.children) == 6:  # Delay brick
                 delay = brick.children[5].text
                 time_type = brick.children[4].text
-                if delay:
-                    time_suffix = 's' if time_type == 'Seconds' else 'm'
-                    config['actions'].append({'delay': f"{delay}{time_suffix}"})
+                if delay.isdigit():
+                    unit = 'sec' if time_type == 'Seconds' else 'min'
+                    config['actions'][action_index] = {
+                        'type': 'delay',
+                        'amount': int(delay),
+                        'unit': unit
+                    }
+                    action_index += 1
             elif len(brick.children) == 7:  # Start/Stop brick
-                action = brick.children[6].text
-                device = brick.children[5].text
-                level = brick.children[4].text
-                if action == 'start':
-                    config['actions'].append({
-                        'action': action,
-                        'device': device.lower(),
-                        'level': level.lower() if level else None
-                    })
-                elif action == 'stop':
-                    config['actions'].append({
-                        'action': action,
-                        'device': device.lower()
-                    })
+                action_type = brick.children[6].text.lower()
+                device = brick.children[5].text.lower().capitalize()
+                level = brick.children[4].text.lower() if action_type == 'start' else None
+                action_data = {
+                    'type': 'action',
+                    'action_type': action_type,
+                    'device': device
+                }
+                if level:
+                    action_data['level'] = level
+                config['actions'][action_index] = action_data
+                action_index += 1
 
-        # Clean up empty or None values
-        for item in config['actions']:
-            if 'level' in item and item['level'] is None:
-                del item['level']
+        # Convert dict to list for correct YAML formatting
+        config['actions'] = [config['actions'][key] for key in sorted(config['actions'].keys())]
 
         # Save to YAML file
         with open(filepath, 'w') as outfile:

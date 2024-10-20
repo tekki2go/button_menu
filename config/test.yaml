@@ -1,5 +1,4 @@
 actions:
-- delay: startm
-- delay: 10s
-- delay: stopm
-- delay: stopm
+- amount: 10
+  type: delay
+  unit: min
