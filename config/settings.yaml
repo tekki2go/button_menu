@@ -1,0 +1,5 @@
+settings:
+  - gpio:
+    steam: 0
+    hotwater: 2
+    vacuum: 3

@@ -1,5 +1,8 @@
 import yaml
 import time
+import pigpio
+
+
 
 # Load the YAML config
 def load_config(config_file):
