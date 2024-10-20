@@ -21,28 +21,31 @@ class ConfigBuilderApp(App):
         self.brick_container = BoxLayout(orientation='vertical', size_hint_y=None)
         self.brick_container.bind(minimum_height=self.brick_container.setter('height'))
 
+        # Calculate ScrollView height
+        scroll_height = Window.height - (4 * 40)  # 900dp - 160dp = 740dp
+
         # ScrollView to handle bricks
-        scroll = ScrollView(size_hint=(1, 0.7))
+        scroll = ScrollView(size_hint=(1, None), height=scroll_height)
         scroll.add_widget(self.brick_container)
         self.root.add_widget(scroll)
 
         # Button to add start/stop brick
-        add_start_stop_btn = Button(text='Add Start/Stop Brick', size_hint=(1, 0.1))
+        add_start_stop_btn = Button(text='Add Start/Stop Brick', size_hint_y=None, height='50dp')
         add_start_stop_btn.bind(on_press=lambda x: self.add_brick('start_stop'))
         self.root.add_widget(add_start_stop_btn)
 
         # Button to add delay brick
-        add_delay_btn = Button(text='Add Delay Brick', size_hint=(1, 0.1))
+        add_delay_btn = Button(text='Add Delay Brick', size_hint_y=None, height='50dp')
         add_delay_btn.bind(on_press=lambda x: self.add_brick('delay'))
         self.root.add_widget(add_delay_btn)
 
         # Button to load configuration
-        load_btn = Button(text='Load Config', size_hint=(1, 0.1))
+        load_btn = Button(text='Load Config', size_hint_y=None, height='50dp')
         load_btn.bind(on_press=self.show_load_popup)
         self.root.add_widget(load_btn)
 
         # Button to save configuration
-        save_btn = Button(text='Save Config', size_hint=(1, 0.1))
+        save_btn = Button(text='Save Config', size_hint_y=None, height='50dp')
         save_btn.bind(on_press=self.show_save_popup)
         self.root.add_widget(save_btn)
 
