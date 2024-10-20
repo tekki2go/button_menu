@@ -51,7 +51,7 @@ class ConfigBuilderApp(App):
             brick.add_widget(action_spinner)
 
             # Device Spinner
-            device_spinner = Spinner(text='Select Device', values=('Steam', 'Hotwater', 'Vacuum'), size_hint_x=0.3)
+            device_spinner = Spinner(text='Select Device', values=('Steam', 'Hotwater', 'Vacuum', 'All'), size_hint_x=0.3)
             brick.add_widget(device_spinner)
 
             # Level Spinner
@@ -120,7 +120,7 @@ class ConfigBuilderApp(App):
         filepath = os.path.join('config', filename)
 
         config = {}
-        config['c1'] = []
+        config['actions'] = []
 
         for brick in self.brick_container.children[::-1]:  # Iterate from top to bottom
             if len(brick.children) == 6:  # Delay brick
@@ -128,22 +128,27 @@ class ConfigBuilderApp(App):
                 time_type = brick.children[4].text
                 if delay:
                     time_suffix = 's' if time_type == 'Seconds' else 'm'
-                    config['c1'].append({'delay': f"{delay}{time_suffix}"})
+                    config['actions'].append({'delay': f"{delay}{time_suffix}"})
             elif len(brick.children) == 7:  # Start/Stop brick
                 action = brick.children[6].text
                 device = brick.children[5].text
                 level = brick.children[4].text
                 if action == 'start':
-                    config['c1'].append({
+                    config['actions'].append({
                         'action': action,
-                        'device': device,
-                        'level': level.lower()
+                        'device': device.lower(),
+                        'level': level.lower() if level else None
                     })
                 elif action == 'stop':
-                    config['c1'].append({
+                    config['actions'].append({
                         'action': action,
-                        'device': device
+                        'device': device.lower()
                     })
+
+        # Clean up empty or None values
+        for item in config['actions']:
+            if 'level' in item and item['level'] is None:
+                del item['level']
 
         # Save to YAML file
         with open(filepath, 'w') as outfile:
