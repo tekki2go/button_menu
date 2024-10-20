@@ -44,27 +44,33 @@ class ConfigBuilderApp(App):
 
     def add_brick(self, brick_type):
         brick = BoxLayout(orientation='horizontal', size_hint_y=None, height='40dp')
+        brick.brick_type = brick_type  # Adding type attribute to identify the brick type later
 
         if brick_type == 'start_stop':
             # Action Spinner
             action_spinner = Spinner(text='Select Action', values=('start', 'stop'), size_hint_x=0.2)
             brick.add_widget(action_spinner)
+            action_spinner.widget_type = 'action_spinner'
 
             # Device Spinner
             device_spinner = Spinner(text='Select Device', values=('Steam', 'Hotwater', 'Vacuum', 'All'), size_hint_x=0.3)
             brick.add_widget(device_spinner)
+            device_spinner.widget_type = 'device_spinner'
 
             # Level Spinner
             level_spinner = Spinner(text='Select Level', values=('Min', 'Med', 'Max'), size_hint_x=0.3)
             brick.add_widget(level_spinner)
+            level_spinner.widget_type = 'level_spinner'
         elif brick_type == 'delay':
             # Delay Time Input
             delay_input = TextInput(hint_text='Delay (0-1000)', size_hint_x=0.2, input_filter='int')
             brick.add_widget(delay_input)
+            delay_input.widget_type = 'delay_input'
 
             # Time Type Spinner (Seconds/Minutes)
             time_type_spinner = Spinner(text='Seconds/Minutes', values=('Seconds', 'Minutes'), size_hint_x=0.3)
             brick.add_widget(time_type_spinner)
+            time_type_spinner.widget_type = 'time_type_spinner'
 
             # Blank Field to maintain size consistency
             blank_field = Label(size_hint_x=0.3)
@@ -119,37 +125,39 @@ class ConfigBuilderApp(App):
             os.makedirs('config')
         filepath = os.path.join('config', filename)
 
-        config = {'actions': {}}
+        config = {'actions': []}
         action_index = 0
 
         for brick in self.brick_container.children[::-1]:  # Iterate from top to bottom
-            if len(brick.children) == 6:  # Delay brick
-                delay = brick.children[5].text
-                time_type = brick.children[4].text
-                if delay.isdigit():
-                    unit = 'sec' if time_type == 'Seconds' else 'min'
-                    config['actions'][action_index] = {
-                        'type': 'delay',
-                        'amount': int(delay),
-                        'unit': unit
+            if hasattr(brick, 'brick_type') and brick.brick_type == 'delay':
+                delay_input = next((child for child in brick.children if getattr(child, 'widget_type', None) == 'delay_input'), None)
+                time_type_spinner = next((child for child in brick.children if getattr(child, 'widget_type', None) == 'time_type_spinner'), None)
+                if delay_input and time_type_spinner:
+                    delay = delay_input.text
+                    time_type = time_type_spinner.text
+                    if delay.isdigit():
+                        unit = 'sec' if time_type == 'Seconds' else 'min'
+                        config['actions'].append({
+                            'type': 'delay',
+                            'amount': int(delay),
+                            'unit': unit
+                        })
+            elif hasattr(brick, 'brick_type') and brick.brick_type == 'start_stop':
+                action_spinner = next((child for child in brick.children if getattr(child, 'widget_type', None) == 'action_spinner'), None)
+                device_spinner = next((child for child in brick.children if getattr(child, 'widget_type', None) == 'device_spinner'), None)
+                level_spinner = next((child for child in brick.children if getattr(child, 'widget_type', None) == 'level_spinner'), None)
+                if action_spinner and device_spinner:
+                    action_type = action_spinner.text.lower()
+                    device = device_spinner.text.lower().capitalize()
+                    level = level_spinner.text.lower() if level_spinner and action_type == 'start' else None
+                    action_data = {
+                        'type': 'action',
+                        'action_type': action_type,
+                        'device': device
                     }
-                    action_index += 1
-            elif len(brick.children) == 7:  # Start/Stop brick
-                action_type = brick.children[6].text.lower()
-                device = brick.children[5].text.lower().capitalize()
-                level = brick.children[4].text.lower() if action_type == 'start' else None
-                action_data = {
-                    'type': 'action',
-                    'action_type': action_type,
-                    'device': device
-                }
-                if level:
-                    action_data['level'] = level
-                config['actions'][action_index] = action_data
-                action_index += 1
-
-        # Convert dict to list for correct YAML formatting
-        config['actions'] = [config['actions'][key] for key in sorted(config['actions'].keys())]
+                    if level:
+                        action_data['level'] = level
+                    config['actions'].append(action_data)
 
         # Save to YAML file
         with open(filepath, 'w') as outfile:

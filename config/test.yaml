@@ -1,4 +1,8 @@
 actions:
+- action_type: start
+  device: Hotwater
+  level: med
+  type: action
 - amount: 10
   type: delay
   unit: min
