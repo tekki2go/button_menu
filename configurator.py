@@ -5,10 +5,8 @@ from kivy.uix.label import Label
 from kivy.uix.spinner import Spinner
 from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.filechooser import FileChooserListView
-from kivy.uix.filechooser import FileChooserIconView
 from kivy.uix.popup import Popup
+from kivy.uix.filechooser import FileChooserIconView  # Added import
 from kivy.core.window import Window
 import yaml
 import os
@@ -18,34 +16,33 @@ class ConfigBuilderApp(App):
         Window.size = (1200, 900)  # Set fixed size
         Window.allow_resize = False  # Disallow resizing
         self.root = BoxLayout(orientation='vertical')
+
+        # Brick container inside ScrollView
         self.brick_container = BoxLayout(orientation='vertical', size_hint_y=None)
         self.brick_container.bind(minimum_height=self.brick_container.setter('height'))
 
-        # Calculate ScrollView height
-        scroll_height = Window.height - (4 * 40)  # 900dp - 160dp = 740dp
-
         # ScrollView to handle bricks
-        scroll = ScrollView(size_hint=(1, None), height=scroll_height)
+        scroll = ScrollView(size_hint=(1, 1))
         scroll.add_widget(self.brick_container)
         self.root.add_widget(scroll)
 
         # Button to add start/stop brick
-        add_start_stop_btn = Button(text='Add Start/Stop Brick', size_hint_y=None, height='50dp')
+        add_start_stop_btn = Button(text='Add Start/Stop Brick', size_hint_y=None, height='40dp')
         add_start_stop_btn.bind(on_press=lambda x: self.add_brick('start_stop'))
         self.root.add_widget(add_start_stop_btn)
 
         # Button to add delay brick
-        add_delay_btn = Button(text='Add Delay Brick', size_hint_y=None, height='50dp')
+        add_delay_btn = Button(text='Add Delay Brick', size_hint_y=None, height='40dp')
         add_delay_btn.bind(on_press=lambda x: self.add_brick('delay'))
         self.root.add_widget(add_delay_btn)
 
         # Button to load configuration
-        load_btn = Button(text='Load Config', size_hint_y=None, height='50dp')
+        load_btn = Button(text='Load Config', size_hint_y=None, height='40dp')
         load_btn.bind(on_press=self.show_load_popup)
         self.root.add_widget(load_btn)
 
         # Button to save configuration
-        save_btn = Button(text='Save Config', size_hint_y=None, height='50dp')
+        save_btn = Button(text='Save Config', size_hint_y=None, height='40dp')
         save_btn.bind(on_press=self.show_save_popup)
         self.root.add_widget(save_btn)
 
@@ -117,14 +114,23 @@ class ConfigBuilderApp(App):
 
     def show_save_popup(self, instance):
         content = BoxLayout(orientation='vertical', padding=10, spacing=10)
-        filename_input = TextInput(hint_text='Enter filename', multiline=False)
-        content.add_widget(filename_input)
 
-        save_btn = Button(text='Save', size_hint_y=None, height='40dp')
-        content.add_widget(save_btn)
+        # Create buttons for custom filenames
+        btn1 = Button(text='Custom Button 1', size_hint_y=None, height='40dp')
+        btn2 = Button(text='Custom Button 2', size_hint_y=None, height='40dp')
+        btn3 = Button(text='Custom Button 3', size_hint_y=None, height='40dp')
 
-        popup = Popup(title='Save Config', content=content, size_hint=(0.7, 0.5))
-        save_btn.bind(on_press=lambda x: self.save_config_file(filename_input.text, popup))
+        content.add_widget(btn1)
+        content.add_widget(btn2)
+        content.add_widget(btn3)
+
+        popup = Popup(title='Save Config', content=content, size_hint=(0.5, 0.5))
+
+        # Bind buttons to save function with predefined filenames
+        btn1.bind(on_press=lambda x: self.save_config_file('c1.yaml', popup))
+        btn2.bind(on_press=lambda x: self.save_config_file('c2.yaml', popup))
+        btn3.bind(on_press=lambda x: self.save_config_file('c3.yaml', popup))
+
         popup.open()
 
     def show_load_popup(self, instance):
@@ -209,7 +215,7 @@ class ConfigBuilderApp(App):
                 level_spinner = next((child for child in brick.children if getattr(child, 'widget_type', None) == 'level_spinner'), None)
                 if action_spinner and device_spinner:
                     action_type = action_spinner.text.lower()
-                    device = device_spinner.text.lower().capitalize()
+                    device = device_spinner.text.capitalize()
                     level = level_spinner.text.lower() if level_spinner and action_type == 'start' else None
                     action_data = {
                         'type': 'action',
