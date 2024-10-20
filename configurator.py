@@ -68,19 +68,22 @@ class ConfigBuilderApp(App):
             brick.add_widget(level_spinner)
             level_spinner.widget_type = 'level_spinner'
 
-            # Initially hide the level_spinner since "Select Action" is not "start"
+            # Initially hide and disable the level_spinner since "Select Action" is not "start"
             level_spinner.opacity = 0
-            # Do NOT change size_hint_x; keep it consistent
+            level_spinner.disabled = True
 
-            # Define a callback to show/hide level_spinner based on action selection
+            # Define a callback to show/hide and enable/disable level_spinner based on action selection
             def on_action_change(spinner, text):
                 if text.lower() == 'start':
                     level_spinner.opacity = 1
+                    level_spinner.disabled = False
                 elif text.lower() == 'stop':
                     level_spinner.opacity = 0
+                    level_spinner.disabled = True
                 else:
                     # For "Select Action" or any other unexpected value
                     level_spinner.opacity = 0
+                    level_spinner.disabled = True
 
             # Bind the callback to the action_spinner
             action_spinner.bind(text=on_action_change)
@@ -202,9 +205,9 @@ class ConfigBuilderApp(App):
                     if level_spinner and 'level' in action:
                         level_spinner.text = action['level'].capitalize()
                     else:
-                        # If action_type is 'stop', ensure level_spinner is hidden
+                        # If action_type is 'stop', ensure level_spinner is hidden and disabled
                         action_spinner.text = action['action_type'].capitalize()
-        
+
         popup.dismiss()
 
     def save_config_file(self, filename, popup):
