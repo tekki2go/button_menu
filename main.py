@@ -81,4 +81,4 @@ def handle_sequence(action_config_file, gpio_config_file):
     pi.stop()
 
 if __name__ == "__main__":
-    handle_sequence('actions_config.yaml', 'gpio_config.yaml')
+    handle_sequence('config/c1.yaml', 'config/settings.yaml')
