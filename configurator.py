@@ -70,20 +70,17 @@ class ConfigBuilderApp(App):
 
             # Initially hide the level_spinner since "Select Action" is not "start"
             level_spinner.opacity = 0
-            level_spinner.size_hint_x = 0
+            # Do NOT change size_hint_x; keep it consistent
 
             # Define a callback to show/hide level_spinner based on action selection
             def on_action_change(spinner, text):
                 if text.lower() == 'start':
                     level_spinner.opacity = 1
-                    level_spinner.size_hint_x = 0.3
                 elif text.lower() == 'stop':
                     level_spinner.opacity = 0
-                    level_spinner.size_hint_x = 0
                 else:
                     # For "Select Action" or any other unexpected value
                     level_spinner.opacity = 0
-                    level_spinner.size_hint_x = 0
 
             # Bind the callback to the action_spinner
             action_spinner.bind(text=on_action_change)
@@ -206,8 +203,8 @@ class ConfigBuilderApp(App):
                         level_spinner.text = action['level'].capitalize()
                     else:
                         # If action_type is 'stop', ensure level_spinner is hidden
-                        level_spinner.text = 'Select Level'  # Reset to default
-
+                        action_spinner.text = action['action_type'].capitalize()
+        
         popup.dismiss()
 
     def save_config_file(self, filename, popup):
