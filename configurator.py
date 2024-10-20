@@ -121,7 +121,7 @@ class ConfigBuilderApp(App):
         content.add_widget(save_btn)
 
         popup = Popup(title='Save Config', content=content, size_hint=(0.7, 0.5))
-        save_btn.bind(on_press=lambda x: self.save_config(filename_input.text, popup))
+        save_btn.bind(on_press=lambda x: self.save_config_file(filename_input.text, popup))
         popup.open()
 
     def show_load_popup(self, instance):
@@ -133,18 +133,18 @@ class ConfigBuilderApp(App):
         content.add_widget(load_btn)
 
         popup = Popup(title='Load Config', content=content, size_hint=(0.9, 0.9))
-        load_btn.bind(on_press=lambda x: self.load_config(filechooser.selection, popup))
+        load_btn.bind(on_press=lambda x: self.load_config_file(filechooser.selection, popup))
         popup.open()
 
-    def load_config(self, selection, popup):
+    def load_config_file(self, selection, popup):
         if not selection:
             print("No file selected")
             popup.dismiss()
             return
 
-        filepath = selection[0] if selection else None
+        filepath = selection[0]
 
-        if not filepath or not os.path.exists(filepath):
+        if not os.path.exists(filepath):
             print(f"Configuration file {filepath} not found")
             popup.dismiss()
             return
@@ -177,7 +177,7 @@ class ConfigBuilderApp(App):
 
         popup.dismiss()
 
-    def save_config(self, filename, popup):
+    def save_config_file(self, filename, popup):
         if not filename.endswith('.yaml'):
             filename += '.yaml'
         if not os.path.exists('config'):
@@ -185,7 +185,6 @@ class ConfigBuilderApp(App):
         filepath = os.path.join('config', filename)
 
         config = {'actions': []}
-        action_index = 0
 
         for brick in self.brick_container.children[::-1]:  # Iterate from top to bottom
             if hasattr(brick, 'brick_type') and brick.brick_type == 'delay':
