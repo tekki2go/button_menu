@@ -1,5 +1,5 @@
 settings:
   gpio:
-    steam: 0
-    hotwater: 2
-    vacuum: 3
+    steam: 17
+    hotwater: 27
+    vacuum: 22
