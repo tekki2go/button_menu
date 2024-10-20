@@ -35,6 +35,11 @@ class ConfigBuilderApp(App):
         add_delay_btn.bind(on_press=lambda x: self.add_brick('delay'))
         self.root.add_widget(add_delay_btn)
 
+        # Button to load configuration
+        load_btn = Button(text='Load Config', size_hint=(1, 0.1))
+        load_btn.bind(on_press=self.show_load_popup)
+        self.root.add_widget(load_btn)
+
         # Button to save configuration
         save_btn = Button(text='Save Config', size_hint=(1, 0.1))
         save_btn.bind(on_press=self.show_save_popup)
@@ -117,6 +122,56 @@ class ConfigBuilderApp(App):
         popup = Popup(title='Save Config', content=content, size_hint=(0.7, 0.5))
         save_btn.bind(on_press=lambda x: self.save_config(filename_input.text, popup))
         popup.open()
+
+    def show_load_popup(self, instance):
+        content = BoxLayout(orientation='vertical', padding=10, spacing=10)
+        filename_input = TextInput(hint_text='Enter filename', multiline=False)
+        content.add_widget(filename_input)
+
+        load_btn = Button(text='Load', size_hint_y=None, height='40dp')
+        content.add_widget(load_btn)
+
+        popup = Popup(title='Load Config', content=content, size_hint=(0.7, 0.5))
+        load_btn.bind(on_press=lambda x: self.load_config(filename_input.text, popup))
+        popup.open()
+
+    def load_config(self, filename, popup):
+        if not filename.endswith('.yaml'):
+            filename += '.yaml'
+        filepath = os.path.join('config', filename)
+
+        if not os.path.exists(filepath):
+            print(f"Configuration file {filepath} not found")
+            popup.dismiss()
+            return
+
+        with open(filepath, 'r') as infile:
+            config = yaml.safe_load(infile)
+
+        self.brick_container.clear_widgets()  # Clear existing bricks
+
+        for action in config.get('actions', []):
+            if action['type'] == 'delay':
+                self.add_brick('delay')
+                last_brick = self.brick_container.children[0]
+                delay_input = next((child for child in last_brick.children if getattr(child, 'widget_type', None) == 'delay_input'), None)
+                time_type_spinner = next((child for child in last_brick.children if getattr(child, 'widget_type', None) == 'time_type_spinner'), None)
+                if delay_input and time_type_spinner:
+                    delay_input.text = str(action['amount'])
+                    time_type_spinner.text = 'Seconds' if action['unit'] == 'sec' else 'Minutes'
+            elif action['type'] == 'action':
+                self.add_brick('start_stop')
+                last_brick = self.brick_container.children[0]
+                action_spinner = next((child for child in last_brick.children if getattr(child, 'widget_type', None) == 'action_spinner'), None)
+                device_spinner = next((child for child in last_brick.children if getattr(child, 'widget_type', None) == 'device_spinner'), None)
+                level_spinner = next((child for child in last_brick.children if getattr(child, 'widget_type', None) == 'level_spinner'), None)
+                if action_spinner and device_spinner:
+                    action_spinner.text = action['action_type'].capitalize()
+                    device_spinner.text = action['device']
+                    if level_spinner and 'level' in action:
+                        level_spinner.text = action['level'].capitalize()
+
+        popup.dismiss()
 
     def save_config(self, filename, popup):
         if not filename.endswith('.yaml'):
