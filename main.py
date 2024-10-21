@@ -1,5 +1,5 @@
 from kivy.app import App
-from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
@@ -41,9 +41,11 @@ class MainMenuScreen(Screen):
         self.add_widget(layout)
 
     def open_menu(self, instance):
+        self.manager.transition = SlideTransition(direction="up")
         self.manager.current = 'menu'
 
     def open_extra_menu(self, instance):
+        self.manager.transition = SlideTransition(direction="left")
         self.manager.current = 'extra_menu'
 
 class MenuScreen(Screen):
@@ -78,9 +80,11 @@ class MenuScreen(Screen):
         self.add_widget(layout)
 
     def go_back(self, instance):
+        self.manager.transition = SlideTransition(direction="down")
         self.manager.current = 'main_menu'
 
     def open_settings(self, instance):
+        self.manager.transition = SlideTransition(direction="left")
         self.manager.current = 'settings'
 
 class SettingsScreen(Screen):
@@ -109,6 +113,7 @@ class SettingsScreen(Screen):
         self.add_widget(layout)
 
     def go_back(self, instance):
+        self.manager.transition = SlideTransition(direction="right")
         self.manager.current = 'menu'
 
 class ExtraMenuScreen(Screen):
@@ -141,6 +146,7 @@ class ExtraMenuScreen(Screen):
         self.add_widget(layout)
 
     def go_back(self, instance):
+        self.manager.transition = SlideTransition(direction="right")
         self.manager.current = 'main_menu'
 
 class MyApp(App):
