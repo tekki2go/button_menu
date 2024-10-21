@@ -66,7 +66,7 @@ class TaskExecutor:
             self.pi.set_mode(pin, pigpio.OUTPUT)
             self.pi.set_PWM_range(pin, 255)  # Set PWM range to 0-255
             self.pi.set_PWM_dutycycle(pin, 0)  # Start with 0 (OFF)
-            self.pwm_channels[device] = pin
+            self.pwm_channels[device.lower()] = pin  # Store device names in lowercase for uniformity
             print(f"Initialized GPIO for {device} on pin {pin}")
 
     def execute_from_file(self, filepath):
@@ -110,10 +110,10 @@ class TaskExecutor:
         :param action: Dictionary containing action details.
         """
         action_type = action.get('action_type')
-        device = action.get('device')
+        device = action.get('device').lower()  # Convert device name to lowercase for uniformity
         level = action.get('level', 'max')  # Default to 'max' if not specified
 
-        if device == 'All':
+        if device == 'all':
             if action_type == 'stop':
                 for dev, pin in self.pwm_channels.items():
                     self.pi.set_PWM_dutycycle(pin, 0)
