@@ -1,0 +1,11 @@
+actions:
+- type: action
+  action_type: start
+  device: All
+  level: select level
+- type: delay
+  amount: 10
+  unit: sec
+- type: action
+  action_type: stop
+  device: All

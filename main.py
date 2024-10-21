@@ -1,97 +1,52 @@
-import yaml
-import time
-import pigpio
+import kivy
+from kivy.app import App
+from kivy.uix.button import Button
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.popup import Popup
+from kivy.uix.gridlayout import GridLayout
+from libs.task_executor import TaskExecutor
 
-raspberry_pi_ip = "10.10.23.231"
+class MainApp(App):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.executor = TaskExecutor()
 
-# Connect to the Raspberry Pi remotely
-pi = pigpio.pi(raspberry_pi_ip)
+    def build(self):
+        layout = GridLayout(cols=1, spacing=10, padding=10)
+        
+        button1 = Button(text='C1', size_hint=(1, 0.3))
+        button2 = Button(text='C2', size_hint=(1, 0.3))
+        button3 = Button(text='C3', size_hint=(1, 0.3))
+        
+        button1.bind(on_press=lambda x: self.execute_task('c1.yaml'))
+        button2.bind(on_press=lambda x: self.execute_task('c2.yaml'))
+        button3.bind(on_press=lambda x: self.execute_task('c3.yaml'))
+        
+        layout.add_widget(button1)
+        layout.add_widget(button2)
+        layout.add_widget(button3)
 
-if not pi.connected:
-    print("Failed to connect to Raspberry Pi.")
-    exit()
-
-# Load the YAML config for GPIO pin mapping
-def load_gpio_config(gpio_config_file):
-    with open(gpio_config_file, 'r') as file:
-        return yaml.safe_load(file)
-
-# Load the YAML config for action sequences
-def load_action_config(action_config_file):
-    with open(action_config_file, 'r') as file:
-        return yaml.safe_load(file)
-
-# Setup GPIO pins using pigpio for controlling GPIO pins
-def setup_gpio_pins(pi, pin_mapping):
-    for device, pin in pin_mapping.items():
-        pi.set_mode(pin, pigpio.OUTPUT)  # Set each pin as OUTPUT
-        pi.write(pin, 1) # Turn off the device by setting the GPIO pin high
-
-# Execute individual actions and delays using pigpio for GPIO control
-def execute_action(pi, pin_mapping, action, device=None, level=None):
-    if action == "stop" and device == "All":
-        print(f"Stopping all devices.")
-        for pin in pin_mapping.values():
-            pi.write(pin, 1)  # Turn off all devices
-    elif action == "start":
-        gpio_pin = pin_mapping.get(device.lower())
-        if gpio_pin is not None:
-            print(f"Starting {device} at level {level} on GPIO pin {gpio_pin}")
-            pi.write(gpio_pin, 0)  # Turn on the device by setting the GPIO pin low
-    elif action == "stop":
-        gpio_pin = pin_mapping.get(device.lower())
-        if gpio_pin is not None:
-            print(f"Stopping {device} on GPIO pin {gpio_pin}")
-            pi.write(gpio_pin, 1)  # Turn off the device by setting the GPIO pin high
-
-# Handle time delays
-def handle_delay(delay):
-    delay_seconds = convert_time_delay(delay)
-    if delay_seconds > 0:
-        print(f"Waiting for {delay}...")
-        time.sleep(delay_seconds)
-
-# Convert time delay (s/m) to seconds
-def convert_time_delay(time_delay):
-    if 's' in time_delay:
-        return int(time_delay.replace('s', ''))
-    elif 'm' in time_delay:
-        return int(time_delay.replace('m', '')) * 60
-    else:
-        return 0
-
-# Main function to handle the sequence of actions
-def handle_sequence(action_config_file, gpio_config_file):
-    global pi
-    # Load the configs
-    action_config = load_action_config(action_config_file)
-    gpio_config = load_gpio_config(gpio_config_file)
+        return layout
     
-    # Extract GPIO pin mappings
-    pin_mapping = gpio_config['settings']['gpio']
-    
-    # Setup GPIO pins
-    setup_gpio_pins(pi, pin_mapping)
-    
-    # Handle the sequence of actions
-    sequence = action_config.get('c1', [])  # Use 'c1' as the key for sequence
+    def execute_task(self, config_file):
+        try:
+            self.executor.execute_from_file(f'config/{config_file}')
+            self.show_popup(f'Task from {config_file} executed successfully!')
+        except Exception as e:
+            self.show_popup(f'Error executing {config_file}: {str(e)}')
 
-    for step in sequence:
-        if 'action' in step:
-            action = step['action']
-            device = step.get('device')
-            level = step.get('level')
-            execute_action(pi, pin_mapping, action, device, level)
-        elif 'delay' in step:
-            delay = step['delay']
-            handle_delay(delay)
+    def show_popup(self, message):
+        content = BoxLayout(orientation='vertical')
+        label = Label(text=message)
+        close_button = Button(text="Close", size_hint=(1, 0.2))
 
-    # Cleanup GPIO (optional)
-    pi.stop()
+        popup = Popup(title='Task Execution', content=content, size_hint=(0.8, 0.4))
+        content.add_widget(label)
+        content.add_widget(close_button)
 
-if __name__ == "__main__":
-    # Ensure the script is not attempting to use GPIO on the local machine
-    if pi.connected:
-        handle_sequence('config/c1.yaml', 'config/settings.yaml')
-    else:
-        print("Script should only connect to the remote Raspberry Pi. Make sure the Raspberry Pi is accessible.")
+        close_button.bind(on_press=popup.dismiss)
+        popup.open()
+
+if __name__ == '__main__':
+    MainApp().run()
