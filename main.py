@@ -14,6 +14,8 @@ import yaml
 import time
 import pigpio
 import sys
+import board
+import neopixel
 
 # Optional: Set window size (useful during development)
 # Window.size = (400, 300)
@@ -42,6 +44,7 @@ class TaskExecutor:
             with open(settings_path, 'r') as f:
                 config = yaml.safe_load(f)
                 self.gpio_settings = config.get('settings', {}).get('gpio', {})
+                self.neopixel_settings = config.get('settings', {}).get('neopixel', {})
         except FileNotFoundError:
             print(f"Settings file {settings_path} not found.")
             sys.exit(1)
@@ -56,7 +59,9 @@ class TaskExecutor:
             sys.exit(1)
 
         self.pwm_channels = {}
+        self.neopixel_channels = {}
         self._initialize_gpio()
+        self._initialize_neopixels()
 
     def _initialize_gpio(self):
         """
@@ -68,6 +73,16 @@ class TaskExecutor:
             self.pi.set_PWM_dutycycle(pin, 0)  # Start with 0 (OFF)
             self.pwm_channels[device.lower()] = pin  # Store device names in lowercase for uniformity
             print(f"Initialized GPIO for {device} on pin {pin}")
+
+    def _initialize_neopixels(self):
+        """
+        Sets up Neopixel LED strips.
+        """
+        for device, pin in self.neopixel_settings.items():
+            pixel_pin = getattr(board, f'GPIO{pin}')
+            num_pixels = 30  # Assuming 30 LEDs per strip; adjust as needed
+            self.neopixel_channels[device.lower()] = neopixel.NeoPixel(pixel_pin, num_pixels, auto_write=False)
+            print(f"Initialized Neopixel for {device} on pin {pin}")
 
     def execute_from_file(self, filepath):
         """
@@ -105,7 +120,7 @@ class TaskExecutor:
 
     def _handle_action(self, action):
         """
-        Handles 'action' type steps, such as starting or stopping devices.
+        Handles 'action' type steps, such as starting or stopping devices or controlling neopixels.
 
         :param action: Dictionary containing action details.
         """
@@ -118,30 +133,64 @@ class TaskExecutor:
                 for dev, pin in self.pwm_channels.items():
                     self.pi.set_PWM_dutycycle(pin, 0)
                     print(f"Stopped {dev}")
+                for dev, pixel in self.neopixel_channels.items():
+                    pixel.fill((0, 0, 0))
+                    pixel.show()
+                    print(f"Stopped Neopixel for {dev}")
             elif action_type == 'start':
                 for dev, pin in self.pwm_channels.items():
                     duty_cycle = self.LEVELS.get(level, 255)
                     self.pi.set_PWM_dutycycle(pin, duty_cycle)
                     print(f"Started {dev} at {level} level ({duty_cycle}/255 duty cycle)")
+                for dev, pixel in self.neopixel_channels.items():
+                    if 'red' in dev:
+                        color = (self.LEVELS.get(level, 255), 0, 0)
+                    elif 'green' in dev:
+                        color = (0, self.LEVELS.get(level, 255), 0)
+                    elif 'blue' in dev:
+                        color = (0, 0, self.LEVELS.get(level, 255))
+                    else:
+                        color = (0, 0, 0)
+                    pixel.fill(color)
+                    pixel.show()
+                    print(f"Started Neopixel {dev} at {level} level with color {color}")
             else:
                 print(f"Unsupported action_type '{action_type}' for device 'All'")
             return
 
-        if device not in self.pwm_channels:
-            print(f"Unknown device: {device}")
-            return
-
-        pin = self.pwm_channels[device]
-
-        if action_type == 'start':
-            duty_cycle = self.LEVELS.get(level, 255)
-            self.pi.set_PWM_dutycycle(pin, duty_cycle)
-            print(f"Started {device} at {level} level ({duty_cycle}/255 duty cycle)")
-        elif action_type == 'stop':
-            self.pi.set_PWM_dutycycle(pin, 0)
-            print(f"Stopped {device}")
+        if device in self.pwm_channels:
+            pin = self.pwm_channels[device]
+            if action_type == 'start':
+                duty_cycle = self.LEVELS.get(level, 255)
+                self.pi.set_PWM_dutycycle(pin, duty_cycle)
+                print(f"Started {device} at {level} level ({duty_cycle}/255 duty cycle)")
+            elif action_type == 'stop':
+                self.pi.set_PWM_dutycycle(pin, 0)
+                print(f"Stopped {device}")
+            else:
+                print(f"Unknown action_type: {action_type}")
+        elif device in self.neopixel_channels:
+            pixel = self.neopixel_channels[device]
+            if action_type == 'start':
+                if 'red' in device:
+                    color = (self.LEVELS.get(level, 255), 0, 0)
+                elif 'green' in device:
+                    color = (0, self.LEVELS.get(level, 255), 0)
+                elif 'blue' in device:
+                    color = (0, 0, self.LEVELS.get(level, 255))
+                else:
+                    color = (0, 0, 0)
+                pixel.fill(color)
+                pixel.show()
+                print(f"Started Neopixel {device} at {level} level with color {color}")
+            elif action_type == 'stop':
+                pixel.fill((0, 0, 0))
+                pixel.show()
+                print(f"Stopped Neopixel for {device}")
+            else:
+                print(f"Unknown action_type: {action_type}")
         else:
-            print(f"Unknown action_type: {action_type}")
+            print(f"Unknown device: {device}")
 
     def _handle_delay(self, action):
         """
@@ -171,6 +220,10 @@ class TaskExecutor:
         for device, pin in self.pwm_channels.items():
             self.pi.set_PWM_dutycycle(pin, 0)
             print(f"Stopped PWM for {device}")
+        for device, pixel in self.neopixel_channels.items():
+            pixel.fill((0, 0, 0))
+            pixel.show()
+            print(f"Stopped Neopixel for {device}")
         self.pi.stop()
 
 

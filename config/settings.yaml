@@ -1,5 +1,3 @@
 settings:
-  gpio:
-    steam: 17
-    hotwater: 27
-    vacuum: 22
+  neopixel:
+    neo1: 17
