@@ -25,47 +25,97 @@ class MainMenuScreen(Screen):
         # Heating Rectangle at the top
         with self.canvas:
             Color(0.694, 0.714, 0.788, 1)  # #b1b6c9 color
-            RoundedRectangle(pos=(Window.width * 0.4, Window.height * 0.92), size=(Window.width * 0.2, Window.height * 0.08), radius=[(0, 0), (0, 0), (15, 15), (15, 15)])
+            RoundedRectangle(
+                pos=(Window.width * 0.4, Window.height * 0.92),
+                size=(Window.width * 0.2, Window.height * 0.08),
+                radius=[(0, 0), (0, 0), (15, 15), (15, 15)]
+            )
         
         # Heating label that updates based on the global heating state
-        self.heating_label = Label(text="Heating: OFF" if not heating_state else "Heating: ON", 
-                                   size_hint=(None, None), size=(Window.width * 0.2, Window.height * 0.08),
-                                   pos_hint={'center_x': 0.5, 'top': 1}, color=(0, 0, 0, 1), font_size='24sp')
+        self.heating_label = Label(
+            text="Heating: OFF" if not heating_state else "Heating: ON",
+            size_hint=(None, None),
+            size=(Window.width * 0.2, Window.height * 0.08),
+            pos_hint={'center_x': 0.5, 'top': 1},
+            color=(0, 0, 0, 1),
+            font_size='24sp'
+        )
         layout.add_widget(self.heating_label)
         
-        # Main buttons with rounded corners and spacing
-        button_layout = BoxLayout(orientation='horizontal', size_hint=(0.9, 0.6), pos_hint={'center_x': 0.5, 'center_y': 0.5}, spacing=40)
-        with button_layout.canvas.before:
-            Color(0.008, 0.408, 0.78, 1)
-            RoundedRectangle(size=(Window.width * 0.25, Window.height * 0.2), pos=(20, 20), radius=[(50, 50), (50, 50), (50, 50), (50, 50)])
-        self.button_steam = Button(text="STEAM", background_color=(0.008, 0.408, 0.78, 1), color=(1, 1, 1, 1), font_size='24sp',
-                                   size_hint=(None, None), size=(300, 300),
-                                   background_normal='', background_down='',
-                                   border=(30, 30, 30, 30))
-        self.button_vacuum = Button(text="VACUUM", background_color=(0.008, 0.408, 0.78, 1), color=(1, 1, 1, 1), font_size='24sp',
-                                    size_hint=(None, None), size=(300, 300),
-                                    background_normal='', background_down='',
-                                    border=(30, 30, 30, 30))
-        self.button_extract = Button(text="EXTRACT", background_color=(0.008, 0.408, 0.78, 1), color=(1, 1, 1, 1), font_size='24sp',
-                                     size_hint=(None, None), size=(300, 300),
-                                     background_normal='', background_down='',
-                                     border=(30, 30, 30, 30))
+        # Main buttons
+        button_layout = BoxLayout(
+            orientation='horizontal',
+            size_hint=(0.9, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            spacing=40
+        )
+        # Removed the canvas.before block here
+
+        self.button_steam = Button(
+            text="STEAM",
+            background_color=(0.008, 0.408, 0.78, 1),
+            color=(1, 1, 1, 1),
+            font_size='24sp',
+            size_hint=(1, 1),
+            background_normal='',
+            background_down=''
+        )
+
+        self.button_vacuum = Button(
+            text="VACUUM",
+            background_color=(0.008, 0.408, 0.78, 1),
+            color=(1, 1, 1, 1),
+            font_size='24sp',
+            size_hint=(1, 1),
+            background_normal='',
+            background_down=''
+        )
+
+        self.button_extract = Button(
+            text="EXTRACT",
+            background_color=(0.008, 0.408, 0.78, 1),
+            color=(1, 1, 1, 1),
+            font_size='24sp',
+            size_hint=(1, 1),
+            background_normal='',
+            background_down=''
+        )
+
         button_layout.add_widget(self.button_steam)
         button_layout.add_widget(self.button_vacuum)
         button_layout.add_widget(self.button_extract)
         layout.add_widget(button_layout)
         
         # Bottom buttons (Menu, Off, and Custom)
-        bottom_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.1), pos_hint={'y': 0})
-        menu_button = Button(text="Menu", background_color=(0.008, 0.408, 0.78, 1), color=(1, 1, 1, 1), font_size='20sp')
+        bottom_layout = BoxLayout(
+            orientation='horizontal',
+            size_hint=(1, 0.1),
+            pos_hint={'y': 0}
+        )
+        menu_button = Button(
+            text="Menu",
+            background_color=(0.008, 0.408, 0.78, 1),
+            color=(1, 1, 1, 1),
+            font_size='20sp'
+        )
         menu_button.bind(on_press=self.open_menu)
         bottom_layout.add_widget(menu_button)
         
-        off_button = Button(text="Off", background_color=(0.008, 0.408, 0.78, 1), color=(1, 1, 1, 1), font_size='20sp')
+        off_button = Button(
+            text="Off",
+            background_color=(0.008, 0.408, 0.78, 1),
+            color=(1, 1, 1, 1),
+            font_size='20sp'
+        )
         off_button.bind(on_press=self.shutdown_sequence)
         bottom_layout.add_widget(off_button)
         
-        arrow_button = Button(text="Custom", background_color=(0.008, 0.408, 0.78, 1), color=(1, 1, 1, 1), font_size='20sp')  # Custom button to go to the extra menu
+        arrow_button = Button(
+            text="Custom",
+            background_color=(0.008, 0.408, 0.78, 1),
+            color=(1, 1, 1, 1),
+            font_size='20sp'
+        )  # Custom button to go to the extra menu
         arrow_button.bind(on_press=self.open_extra_menu)
         bottom_layout.add_widget(arrow_button)
         
@@ -95,7 +145,12 @@ class MainMenuScreen(Screen):
             RoundedRectangle(pos=self.pos, size=Window.size)
         
         # Display shutdown message with countdown
-        self.countdown_label = Label(text="Shutting down in 5", font_size='30sp', size_hint=(None, None), pos_hint={'center_x': 0.5, 'center_y': 0.5})
+        self.countdown_label = Label(
+            text="Shutting down in 5",
+            font_size='30sp',
+            size_hint=(None, None),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+        )
         self.add_widget(self.countdown_label)
         
         # Start countdown
