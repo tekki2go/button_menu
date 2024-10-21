@@ -54,7 +54,7 @@ class ConfigBuilderApp(App):
 
         if brick_type == 'start_stop':
             # Action Spinner
-            action_spinner = Spinner(text='Select Action', values=('start', 'stop'), size_hint_x=0.2)
+            action_spinner = Spinner(text='Select Type', values=('start', 'stop'), size_hint_x=0.2)
             brick.add_widget(action_spinner)
             action_spinner.widget_type = 'action_spinner'
 
@@ -68,7 +68,7 @@ class ConfigBuilderApp(App):
             brick.add_widget(level_spinner)
             level_spinner.widget_type = 'level_spinner'
 
-            # Initially hide and disable the level_spinner since "Select Action" is not "start"
+            # Initially hide and disable the level_spinner since "Select Type" is not "start"
             level_spinner.opacity = 0
             level_spinner.disabled = True
 
@@ -81,7 +81,7 @@ class ConfigBuilderApp(App):
                     level_spinner.opacity = 0
                     level_spinner.disabled = True
                 else:
-                    # For "Select Action" or any other unexpected value
+                    # For "Select Type" or any other unexpected value
                     level_spinner.opacity = 0
                     level_spinner.disabled = True
 
@@ -193,20 +193,21 @@ class ConfigBuilderApp(App):
                 if delay_input and time_type_spinner:
                     delay_input.text = str(action['amount'])
                     time_type_spinner.text = 'Seconds' if action['unit'] == 'sec' else 'Minutes'
-            elif action['type'] == 'action':
+            elif action['type'] in ('start', 'stop'):
                 self.add_brick('start_stop')
                 last_brick = self.brick_container.children[0]
                 action_spinner = next((child for child in last_brick.children if getattr(child, 'widget_type', None) == 'action_spinner'), None)
                 device_spinner = next((child for child in last_brick.children if getattr(child, 'widget_type', None) == 'device_spinner'), None)
                 level_spinner = next((child for child in last_brick.children if getattr(child, 'widget_type', None) == 'level_spinner'), None)
                 if action_spinner and device_spinner:
-                    action_spinner.text = action['action_type'].capitalize()
+                    action_spinner.text = action['type'].capitalize()
                     device_spinner.text = action['device']
-                    if level_spinner and 'level' in action:
+                    if level_spinner and action['type'] == 'start' and 'level' in action:
                         level_spinner.text = action['level'].capitalize()
                     else:
-                        # If action_type is 'stop', ensure level_spinner is hidden and disabled
-                        action_spinner.text = action['action_type'].capitalize()
+                        # If type is 'stop', ensure level_spinner is hidden and disabled
+                        level_spinner.opacity = 0
+                        level_spinner.disabled = True
 
         popup.dismiss()
 
@@ -242,8 +243,7 @@ class ConfigBuilderApp(App):
                     device = device_spinner.text.capitalize()
                     level = level_spinner.text.lower() if level_spinner and action_type == 'start' else None
                     action_data = {
-                        'type': 'action',
-                        'action_type': action_type,
+                        'type': action_type,
                         'device': device
                     }
                     if level:

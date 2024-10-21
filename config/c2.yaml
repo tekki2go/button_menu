@@ -1,73 +1,21 @@
 actions:
-- type: action
-  action_type: start
+- type: start
   device: Steam
   level: min
 - type: delay
-  amount: 10
-  unit: sec
-- type: action
-  action_type: start
-  device: Hotwater
-  level: med
-- type: delay
-  amount: 10
-  unit: sec
-- type: action
-  action_type: start
-  device: Vacuum
-  level: max
-- type: delay
   amount: 30
   unit: sec
-- type: action
-  action_type: stop
-  device: All
-- type: action
-  action_type: start
+- type: stop
   device: Steam
-  level: min
 - type: delay
-  amount: 10
-  unit: sec
-- type: action
-  action_type: start
+  amount: 30
+  unit: min
+- type: start
   device: Hotwater
   level: med
 - type: delay
-  amount: 10
-  unit: sec
-- type: action
-  action_type: start
+  amount: 30
+  unit: min
+- type: start
   device: Vacuum
   level: max
-- type: delay
-  amount: 30
-  unit: sec
-- type: action
-  action_type: stop
-  device: All
-- type: action
-  action_type: start
-  device: Steam
-  level: min
-- type: delay
-  amount: 10
-  unit: sec
-- type: action
-  action_type: start
-  device: Hotwater
-  level: med
-- type: delay
-  amount: 10
-  unit: sec
-- type: action
-  action_type: start
-  device: Vacuum
-  level: max
-- type: delay
-  amount: 30
-  unit: sec
-- type: action
-  action_type: stop
-  device: All
