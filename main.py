@@ -2,15 +2,14 @@ from kivy.lang import Builder
 from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.screenmanager import MDScreenManager
-from kivy.uix.screenmanager import SlideTransition
-from kivymd.uix.button import MDRaisedButton, MDRectangleFlatButton, MDRoundFlatButton
+from kivymd.uix.button import MDRaisedButton, MDRectangleFlatButton
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.label import MDLabel
 from kivymd.uix.floatlayout import MDFloatLayout
-from kivymd.uix.widget import MDWidget
 from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
+from kivy.uix.screenmanager import SlideTransition
 
 # Global variable for heating state
 heating_state = False
@@ -53,28 +52,28 @@ class MainMenuScreen(MDScreen):
             spacing=40
         )
 
-        self.button_steam = MDRoundFlatButton(
+        self.button_steam = MDRectangleFlatButton(
             text="STEAM",
             md_bg_color=(0.008, 0.408, 0.78, 1),
             text_color=(1, 1, 1, 1),
             font_size='24sp',
-            size_hint=(1, 1)
+            size_hint=(1, 1.5)
         )
 
-        self.button_vacuum = MDRoundFlatButton(
+        self.button_vacuum = MDRectangleFlatButton(
             text="VACUUM",
             md_bg_color=(0.008, 0.408, 0.78, 1),
             text_color=(1, 1, 1, 1),
             font_size='24sp',
-            size_hint=(1, 1)
+            size_hint=(1, 1.5)
         )
 
-        self.button_extract = MDRoundFlatButton(
+        self.button_extract = MDRectangleFlatButton(
             text="EXTRACT",
             md_bg_color=(0.008, 0.408, 0.78, 1),
             text_color=(1, 1, 1, 1),
             font_size='24sp',
-            size_hint=(1, 1)
+            size_hint=(1, 1.5)
         )
 
         button_layout.add_widget(self.button_steam)
@@ -88,7 +87,7 @@ class MainMenuScreen(MDScreen):
             size_hint=(1, 0.1),
             pos_hint={'y': 0}
         )
-        menu_button = MDRoundFlatButton(
+        menu_button = MDRaisedButton(
             text="Menu",
             md_bg_color=(0.008, 0.408, 0.78, 1),
             text_color=(1, 1, 1, 1),
@@ -97,7 +96,7 @@ class MainMenuScreen(MDScreen):
         menu_button.bind(on_press=self.open_menu)
         bottom_layout.add_widget(menu_button)
         
-        off_button = MDRoundFlatButton(
+        off_button = MDRaisedButton(
             text="Off",
             md_bg_color=(0.008, 0.408, 0.78, 1),
             text_color=(1, 1, 1, 1),
@@ -106,7 +105,7 @@ class MainMenuScreen(MDScreen):
         off_button.bind(on_press=self.shutdown_sequence)
         bottom_layout.add_widget(off_button)
         
-        arrow_button = MDRoundFlatButton(
+        arrow_button = MDRaisedButton(
             text="Custom",
             md_bg_color=(0.008, 0.408, 0.78, 1),
             text_color=(1, 1, 1, 1),
@@ -168,11 +167,11 @@ class MenuScreen(MDScreen):
         
         # Second menu with 4 options
         button_layout = MDBoxLayout(orientation='vertical', size_hint=(1, 0.8))
-        language_button = MDRoundFlatButton(text="LANGUAGE", font_size='20sp')
-        startup_button = MDRoundFlatButton(text="STARTUP", font_size='20sp')
-        settings_button = MDRoundFlatButton(text="SETTINGS", font_size='20sp')
+        language_button = MDRaisedButton(text="LANGUAGE", font_size='20sp')
+        startup_button = MDRaisedButton(text="STARTUP", font_size='20sp')
+        settings_button = MDRaisedButton(text="SETTINGS", font_size='20sp')
         settings_button.bind(on_press=self.open_settings)
-        maintenance_button = MDRoundFlatButton(text="MAINTENANCE", font_size='20sp')
+        maintenance_button = MDRaisedButton(text="MAINTENANCE", font_size='20sp')
         
         button_layout.add_widget(language_button)
         button_layout.add_widget(startup_button)
@@ -182,11 +181,11 @@ class MenuScreen(MDScreen):
         
         # Bottom buttons (Back and OFF)
         bottom_layout = MDBoxLayout(size_hint=(1, 0.2))
-        back_button = MDRoundFlatButton(text="BACK", font_size='20sp')
+        back_button = MDRaisedButton(text="BACK", font_size='20sp')
         back_button.bind(on_press=self.go_back)
         bottom_layout.add_widget(back_button)
         
-        off_button = MDRoundFlatButton(text="OFF", font_size='20sp')
+        off_button = MDRaisedButton(text="OFF", font_size='20sp')
         off_button.bind(on_press=self.shutdown_sequence)
         bottom_layout.add_widget(off_button)
         layout.add_widget(bottom_layout)
@@ -230,19 +229,19 @@ class SettingsScreen(MDScreen):
         
         # Settings list with options
         button_layout = MDBoxLayout(orientation='vertical', size_hint=(1, 0.8))
-        button_layout.add_widget(MDRoundFlatButton(text="Standby: 120 min", font_size='20sp'))
-        button_layout.add_widget(MDRoundFlatButton(text="Screen Brightness: 100%", font_size='20sp'))
-        button_layout.add_widget(MDRoundFlatButton(text="Bluetooth", font_size='20sp'))
-        button_layout.add_widget(MDRoundFlatButton(text="Wi-Fi", font_size='20sp'))
+        button_layout.add_widget(MDRaisedButton(text="Standby: 120 min", font_size='20sp'))
+        button_layout.add_widget(MDRaisedButton(text="Screen Brightness: 100%", font_size='20sp'))
+        button_layout.add_widget(MDRaisedButton(text="Bluetooth", font_size='20sp'))
+        button_layout.add_widget(MDRaisedButton(text="Wi-Fi", font_size='20sp'))
         layout.add_widget(button_layout)
         
         # Bottom buttons (Back and OFF)
         bottom_layout = MDBoxLayout(size_hint=(1, 0.2))
-        back_button = MDRoundFlatButton(text="BACK", font_size='20sp')
+        back_button = MDRaisedButton(text="BACK", font_size='20sp')
         back_button.bind(on_press=self.go_back)
         bottom_layout.add_widget(back_button)
         
-        off_button = MDRoundFlatButton(text="OFF", font_size='20sp')
+        off_button = MDRaisedButton(text="OFF", font_size='20sp')
         off_button.bind(on_press=self.shutdown_sequence)
         bottom_layout.add_widget(off_button)
         layout.add_widget(bottom_layout)
@@ -287,18 +286,18 @@ class ExtraMenuScreen(MDScreen):
         
         # Main buttons (C1, C2, C3)
         button_layout = MDBoxLayout(orientation='horizontal', size_hint=(1, 0.7))
-        button_layout.add_widget(MDRoundFlatButton(text="C1", font_size='20sp'))
-        button_layout.add_widget(MDRoundFlatButton(text="C2", font_size='20sp'))
-        button_layout.add_widget(MDRoundFlatButton(text="C3", font_size='20sp'))
+        button_layout.add_widget(MDRaisedButton(text="C1", font_size='20sp'))
+        button_layout.add_widget(MDRaisedButton(text="C2", font_size='20sp'))
+        button_layout.add_widget(MDRaisedButton(text="C3", font_size='20sp'))
         layout.add_widget(button_layout)
         
         # Bottom buttons (Back and OFF)
         bottom_layout = MDBoxLayout(size_hint=(1, 0.2))
-        back_button = MDRoundFlatButton(text="BACK", font_size='20sp')
+        back_button = MDRaisedButton(text="BACK", font_size='20sp')
         back_button.bind(on_press=self.go_back)
         bottom_layout.add_widget(back_button)
         
-        off_button = MDRoundFlatButton(text="OFF", font_size='20sp')
+        off_button = MDRaisedButton(text="OFF", font_size='20sp')
         off_button.bind(on_press=self.shutdown_sequence)
         bottom_layout.add_widget(off_button)
         layout.add_widget(bottom_layout)
