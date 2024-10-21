@@ -1,21 +1,24 @@
-from kivy.app import App
-from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
-from kivy.uix.button import Button
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.uix.floatlayout import FloatLayout
-from kivy.graphics import Color, RoundedRectangle
-from kivy.uix.widget import Widget
+from kivy.lang import Builder
+from kivymd.app import MDApp
+from kivymd.uix.screen import MDScreen
+from kivymd.uix.screenmanager import MDScreenManager
+from kivy.uix.screenmanager import SlideTransition
+from kivymd.uix.button import MDRaisedButton, MDRectangleFlatButton, MDRoundFlatButton
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.label import MDLabel
+from kivymd.uix.floatlayout import MDFloatLayout
+from kivymd.uix.widget import MDWidget
 from kivy.core.window import Window
 from kivy.clock import Clock
+from kivy.graphics import Color, RoundedRectangle
 
 # Global variable for heating state
 heating_state = False
 
-class MainMenuScreen(Screen):
+class MainMenuScreen(MDScreen):
     def __init__(self, **kwargs):
         super(MainMenuScreen, self).__init__(**kwargs)
-        layout = FloatLayout()
+        layout = MDFloatLayout()
         
         # Background color
         with self.canvas.before:
@@ -32,53 +35,46 @@ class MainMenuScreen(Screen):
             )
         
         # Heating label that updates based on the global heating state
-        self.heating_label = Label(
+        self.heating_label = MDLabel(
             text="Heating: OFF" if not heating_state else "Heating: ON",
             size_hint=(None, None),
             size=(Window.width * 0.2, Window.height * 0.08),
             pos_hint={'center_x': 0.5, 'top': 1},
             color=(0, 0, 0, 1),
-            font_size='24sp'
+            font_style='H5'
         )
         layout.add_widget(self.heating_label)
         
         # Main buttons
-        button_layout = BoxLayout(
+        button_layout = MDBoxLayout(
             orientation='horizontal',
             size_hint=(0.9, 0.6),
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
             spacing=40
         )
-        # Removed the canvas.before block here
 
-        self.button_steam = Button(
+        self.button_steam = MDRoundFlatButton(
             text="STEAM",
-            background_color=(0.008, 0.408, 0.78, 1),
-            color=(1, 1, 1, 1),
+            md_bg_color=(0.008, 0.408, 0.78, 1),
+            text_color=(1, 1, 1, 1),
             font_size='24sp',
-            size_hint=(1, 1),
-            background_normal='',
-            background_down=''
+            size_hint=(1, 1)
         )
 
-        self.button_vacuum = Button(
+        self.button_vacuum = MDRoundFlatButton(
             text="VACUUM",
-            background_color=(0.008, 0.408, 0.78, 1),
-            color=(1, 1, 1, 1),
+            md_bg_color=(0.008, 0.408, 0.78, 1),
+            text_color=(1, 1, 1, 1),
             font_size='24sp',
-            size_hint=(1, 1),
-            background_normal='',
-            background_down=''
+            size_hint=(1, 1)
         )
 
-        self.button_extract = Button(
+        self.button_extract = MDRoundFlatButton(
             text="EXTRACT",
-            background_color=(0.008, 0.408, 0.78, 1),
-            color=(1, 1, 1, 1),
+            md_bg_color=(0.008, 0.408, 0.78, 1),
+            text_color=(1, 1, 1, 1),
             font_size='24sp',
-            size_hint=(1, 1),
-            background_normal='',
-            background_down=''
+            size_hint=(1, 1)
         )
 
         button_layout.add_widget(self.button_steam)
@@ -87,33 +83,33 @@ class MainMenuScreen(Screen):
         layout.add_widget(button_layout)
         
         # Bottom buttons (Menu, Off, and Custom)
-        bottom_layout = BoxLayout(
+        bottom_layout = MDBoxLayout(
             orientation='horizontal',
             size_hint=(1, 0.1),
             pos_hint={'y': 0}
         )
-        menu_button = Button(
+        menu_button = MDRoundFlatButton(
             text="Menu",
-            background_color=(0.008, 0.408, 0.78, 1),
-            color=(1, 1, 1, 1),
+            md_bg_color=(0.008, 0.408, 0.78, 1),
+            text_color=(1, 1, 1, 1),
             font_size='20sp'
         )
         menu_button.bind(on_press=self.open_menu)
         bottom_layout.add_widget(menu_button)
         
-        off_button = Button(
+        off_button = MDRoundFlatButton(
             text="Off",
-            background_color=(0.008, 0.408, 0.78, 1),
-            color=(1, 1, 1, 1),
+            md_bg_color=(0.008, 0.408, 0.78, 1),
+            text_color=(1, 1, 1, 1),
             font_size='20sp'
         )
         off_button.bind(on_press=self.shutdown_sequence)
         bottom_layout.add_widget(off_button)
         
-        arrow_button = Button(
+        arrow_button = MDRoundFlatButton(
             text="Custom",
-            background_color=(0.008, 0.408, 0.78, 1),
-            color=(1, 1, 1, 1),
+            md_bg_color=(0.008, 0.408, 0.78, 1),
+            text_color=(1, 1, 1, 1),
             font_size='20sp'
         )  # Custom button to go to the extra menu
         arrow_button.bind(on_press=self.open_extra_menu)
@@ -145,9 +141,9 @@ class MainMenuScreen(Screen):
             RoundedRectangle(pos=self.pos, size=Window.size)
         
         # Display shutdown message with countdown
-        self.countdown_label = Label(
+        self.countdown_label = MDLabel(
             text="Shutting down in 5",
-            font_size='30sp',
+            font_style='H5',
             size_hint=(None, None),
             pos_hint={'center_x': 0.5, 'center_y': 0.5}
         )
@@ -162,21 +158,21 @@ class MainMenuScreen(Screen):
         if self.countdown > 0:
             self.countdown_label.text = f"Shutting down in {self.countdown}"
         else:
-            App.get_running_app().stop()
+            MDApp.get_running_app().stop()
             Window.close()
 
-class MenuScreen(Screen):
+class MenuScreen(MDScreen):
     def __init__(self, **kwargs):
         super(MenuScreen, self).__init__(**kwargs)
-        layout = BoxLayout(orientation='vertical')
+        layout = MDBoxLayout(orientation='vertical')
         
         # Second menu with 4 options
-        button_layout = BoxLayout(orientation='vertical', size_hint=(1, 0.8))
-        language_button = Button(text="LANGUAGE", font_size='20sp')
-        startup_button = Button(text="STARTUP", font_size='20sp')
-        settings_button = Button(text="SETTINGS", font_size='20sp')
+        button_layout = MDBoxLayout(orientation='vertical', size_hint=(1, 0.8))
+        language_button = MDRoundFlatButton(text="LANGUAGE", font_size='20sp')
+        startup_button = MDRoundFlatButton(text="STARTUP", font_size='20sp')
+        settings_button = MDRoundFlatButton(text="SETTINGS", font_size='20sp')
         settings_button.bind(on_press=self.open_settings)
-        maintenance_button = Button(text="MAINTENANCE", font_size='20sp')
+        maintenance_button = MDRoundFlatButton(text="MAINTENANCE", font_size='20sp')
         
         button_layout.add_widget(language_button)
         button_layout.add_widget(startup_button)
@@ -185,12 +181,12 @@ class MenuScreen(Screen):
         layout.add_widget(button_layout)
         
         # Bottom buttons (Back and OFF)
-        bottom_layout = BoxLayout(size_hint=(1, 0.2))
-        back_button = Button(text="BACK", font_size='20sp')
+        bottom_layout = MDBoxLayout(size_hint=(1, 0.2))
+        back_button = MDRoundFlatButton(text="BACK", font_size='20sp')
         back_button.bind(on_press=self.go_back)
         bottom_layout.add_widget(back_button)
         
-        off_button = Button(text="OFF", font_size='20sp')
+        off_button = MDRoundFlatButton(text="OFF", font_size='20sp')
         off_button.bind(on_press=self.shutdown_sequence)
         bottom_layout.add_widget(off_button)
         layout.add_widget(bottom_layout)
@@ -212,7 +208,7 @@ class MenuScreen(Screen):
             RoundedRectangle(pos=self.pos, size=Window.size)
         
         # Display shutdown message with countdown
-        self.countdown_label = Label(text="Shutting down in 5", font_size='30sp', size_hint=(None, None), pos_hint={'center_x': 0.5, 'center_y': 0.5})
+        self.countdown_label = MDLabel(text="Shutting down in 5", font_style='H5', size_hint=(None, None), pos_hint={'center_x': 0.5, 'center_y': 0.5})
         self.add_widget(self.countdown_label)
         
         # Start countdown
@@ -224,29 +220,29 @@ class MenuScreen(Screen):
         if self.countdown > 0:
             self.countdown_label.text = f"Shutting down in {self.countdown}"
         else:
-            App.get_running_app().stop()
+            MDApp.get_running_app().stop()
             Window.close()
 
-class SettingsScreen(Screen):
+class SettingsScreen(MDScreen):
     def __init__(self, **kwargs):
         super(SettingsScreen, self).__init__(**kwargs)
-        layout = BoxLayout(orientation='vertical')
+        layout = MDBoxLayout(orientation='vertical')
         
         # Settings list with options
-        button_layout = BoxLayout(orientation='vertical', size_hint=(1, 0.8))
-        button_layout.add_widget(Button(text="Standby: 120 min", font_size='20sp'))
-        button_layout.add_widget(Button(text="Screen Brightness: 100%", font_size='20sp'))
-        button_layout.add_widget(Button(text="Bluetooth", font_size='20sp'))
-        button_layout.add_widget(Button(text="Wi-Fi", font_size='20sp'))
+        button_layout = MDBoxLayout(orientation='vertical', size_hint=(1, 0.8))
+        button_layout.add_widget(MDRoundFlatButton(text="Standby: 120 min", font_size='20sp'))
+        button_layout.add_widget(MDRoundFlatButton(text="Screen Brightness: 100%", font_size='20sp'))
+        button_layout.add_widget(MDRoundFlatButton(text="Bluetooth", font_size='20sp'))
+        button_layout.add_widget(MDRoundFlatButton(text="Wi-Fi", font_size='20sp'))
         layout.add_widget(button_layout)
         
         # Bottom buttons (Back and OFF)
-        bottom_layout = BoxLayout(size_hint=(1, 0.2))
-        back_button = Button(text="BACK", font_size='20sp')
+        bottom_layout = MDBoxLayout(size_hint=(1, 0.2))
+        back_button = MDRoundFlatButton(text="BACK", font_size='20sp')
         back_button.bind(on_press=self.go_back)
         bottom_layout.add_widget(back_button)
         
-        off_button = Button(text="OFF", font_size='20sp')
+        off_button = MDRoundFlatButton(text="OFF", font_size='20sp')
         off_button.bind(on_press=self.shutdown_sequence)
         bottom_layout.add_widget(off_button)
         layout.add_widget(bottom_layout)
@@ -264,7 +260,7 @@ class SettingsScreen(Screen):
             RoundedRectangle(pos=self.pos, size=Window.size)
         
         # Display shutdown message with countdown
-        self.countdown_label = Label(text="Shutting down in 5", font_size='30sp', size_hint=(None, None), pos_hint={'center_x': 0.5, 'center_y': 0.5})
+        self.countdown_label = MDLabel(text="Shutting down in 5", font_style='H5', size_hint=(None, None), pos_hint={'center_x': 0.5, 'center_y': 0.5})
         self.add_widget(self.countdown_label)
         
         # Start countdown
@@ -276,33 +272,33 @@ class SettingsScreen(Screen):
         if self.countdown > 0:
             self.countdown_label.text = f"Shutting down in {self.countdown}"
         else:
-            App.get_running_app().stop()
+            MDApp.get_running_app().stop()
             Window.close()
 
-class ExtraMenuScreen(Screen):
+class ExtraMenuScreen(MDScreen):
     def __init__(self, **kwargs):
         super(ExtraMenuScreen, self).__init__(**kwargs)
-        layout = BoxLayout(orientation='vertical')
+        layout = MDBoxLayout(orientation='vertical')
         
         # Top status bar (Heating: OFF)
-        status_bar = BoxLayout(size_hint=(1, 0.1))
-        status_bar.add_widget(Label(text="Heating: OFF", size_hint=(1, 0.2), font_size='20sp'))
+        status_bar = MDBoxLayout(size_hint=(1, 0.1))
+        status_bar.add_widget(MDLabel(text="Heating: OFF", size_hint=(1, 0.2), font_style='H5'))
         layout.add_widget(status_bar)
         
         # Main buttons (C1, C2, C3)
-        button_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.7))
-        button_layout.add_widget(Button(text="C1", font_size='20sp'))
-        button_layout.add_widget(Button(text="C2", font_size='20sp'))
-        button_layout.add_widget(Button(text="C3", font_size='20sp'))
+        button_layout = MDBoxLayout(orientation='horizontal', size_hint=(1, 0.7))
+        button_layout.add_widget(MDRoundFlatButton(text="C1", font_size='20sp'))
+        button_layout.add_widget(MDRoundFlatButton(text="C2", font_size='20sp'))
+        button_layout.add_widget(MDRoundFlatButton(text="C3", font_size='20sp'))
         layout.add_widget(button_layout)
         
         # Bottom buttons (Back and OFF)
-        bottom_layout = BoxLayout(size_hint=(1, 0.2))
-        back_button = Button(text="BACK", font_size='20sp')
+        bottom_layout = MDBoxLayout(size_hint=(1, 0.2))
+        back_button = MDRoundFlatButton(text="BACK", font_size='20sp')
         back_button.bind(on_press=self.go_back)
         bottom_layout.add_widget(back_button)
         
-        off_button = Button(text="OFF", font_size='20sp')
+        off_button = MDRoundFlatButton(text="OFF", font_size='20sp')
         off_button.bind(on_press=self.shutdown_sequence)
         bottom_layout.add_widget(off_button)
         layout.add_widget(bottom_layout)
@@ -320,7 +316,7 @@ class ExtraMenuScreen(Screen):
             RoundedRectangle(pos=self.pos, size=Window.size)
         
         # Display shutdown message with countdown
-        self.countdown_label = Label(text="Shutting down in 5", font_size='30sp', size_hint=(None, None), pos_hint={'center_x': 0.5, 'center_y': 0.5})
+        self.countdown_label = MDLabel(text="Shutting down in 5", font_style='H5', size_hint=(None, None), pos_hint={'center_x': 0.5, 'center_y': 0.5})
         self.add_widget(self.countdown_label)
         
         # Start countdown
@@ -332,12 +328,12 @@ class ExtraMenuScreen(Screen):
         if self.countdown > 0:
             self.countdown_label.text = f"Shutting down in {self.countdown}"
         else:
-            App.get_running_app().stop()
+            MDApp.get_running_app().stop()
             Window.close()
 
-class MyApp(App):
+class MyApp(MDApp):
     def build(self):
-        sm = ScreenManager()
+        sm = MDScreenManager()
         sm.add_widget(MainMenuScreen(name='main_menu'))
         sm.add_widget(MenuScreen(name='menu'))
         sm.add_widget(SettingsScreen(name='settings'))
