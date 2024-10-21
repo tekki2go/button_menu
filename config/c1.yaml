@@ -1,10 +1,52 @@
 actions:
 - type: action
   action_type: start
-  device: All
-  level: select level
+  device: Steam
+  level: min
 - type: delay
-  amount: 10
+  amount: 2
+  unit: sec
+- type: action
+  action_type: start
+  device: Steam
+  level: med
+- type: delay
+  amount: 2
+  unit: sec
+- type: action
+  action_type: start
+  device: Steam
+  level: max
+- type: delay
+  amount: 2
+  unit: sec
+- type: action
+  action_type: start
+  device: Hotwater
+  level: min
+- type: delay
+  amount: 2
+  unit: sec
+- type: action
+  action_type: start
+  device: Hotwater
+  level: med
+- type: delay
+  amount: 2
+  unit: sec
+- type: action
+  action_type: start
+  device: Hotwater
+  level: max
+- type: delay
+  amount: 2
+  unit: sec
+- type: action
+  action_type: start
+  device: All
+  level: med
+- type: delay
+  amount: 5
   unit: sec
 - type: action
   action_type: stop
