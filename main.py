@@ -4,7 +4,7 @@ from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
-from kivy.graphics import Color, RoundedRectangle
+from kivy.graphics import Color, RoundedRectangle, Line
 from kivy.core.window import Window
 from kivy.clock import Clock
 
@@ -19,12 +19,12 @@ class MainMenuScreen(Screen):
         # Background color
         with self.canvas.before:
             Color(0, 0.478, 0.905, 1)  # #007ae7 color
-            RoundedRectangle(pos=self.pos, size=Window.size)
+            self.bg_rect = RoundedRectangle(pos=self.pos, size=Window.size)
         
         # Heating Rectangle at the top
         with self.canvas:
             Color(0.694, 0.714, 0.788, 1)  # #b1b6c9 color
-            RoundedRectangle(
+            self.heating_rect = RoundedRectangle(
                 pos=(Window.width * 0.4, Window.height * 0.92),
                 size=(Window.width * 0.2, Window.height * 0.08),
                 radius=[(0, 0), (0, 0), (15, 15), (15, 15)]
@@ -54,7 +54,6 @@ class MainMenuScreen(Screen):
             background_color=(0.008, 0.408, 0.78, 1),
             color=(1, 1, 1, 1),
             font_size='24sp',
-            size_hint=(1, 1),
             background_normal='',
             background_down=''
         )
@@ -64,7 +63,6 @@ class MainMenuScreen(Screen):
             background_color=(0.008, 0.408, 0.78, 1),
             color=(1, 1, 1, 1),
             font_size='24sp',
-            size_hint=(1, 1),
             background_normal='',
             background_down=''
         )
@@ -74,7 +72,6 @@ class MainMenuScreen(Screen):
             background_color=(0.008, 0.408, 0.78, 1),
             color=(1, 1, 1, 1),
             font_size='24sp',
-            size_hint=(1, 1),
             background_normal='',
             background_down=''
         )
@@ -88,11 +85,15 @@ class MainMenuScreen(Screen):
         bottom_layout = BoxLayout(
             orientation='horizontal',
             size_hint=(1, 0.1),
-            pos_hint={'y': 0}
+            pos_hint={'y': 0},
+            spacing=10,
+            padding=[10, 0, 10, 10]
         )
         menu_button = Button(
             text="Menu",
             background_color=(0.008, 0.408, 0.78, 1),
+            background_normal='',
+            background_down='',
             color=(1, 1, 1, 1),
             font_size='20sp'
         )
@@ -102,6 +103,8 @@ class MainMenuScreen(Screen):
         off_button = Button(
             text="Off",
             background_color=(0.008, 0.408, 0.78, 1),
+            background_normal='',
+            background_down='',
             color=(1, 1, 1, 1),
             font_size='20sp'
         )
@@ -111,6 +114,8 @@ class MainMenuScreen(Screen):
         arrow_button = Button(
             text="Custom",
             background_color=(0.008, 0.408, 0.78, 1),
+            background_normal='',
+            background_down='',
             color=(1, 1, 1, 1),
             font_size='20sp'
         )  # Custom button to go to the extra menu
@@ -138,16 +143,35 @@ class MainMenuScreen(Screen):
     def shutdown_sequence(self, instance):
         # Clear the screen except for the background
         self.clear_widgets()
+        self.canvas.clear()
         with self.canvas.before:
             Color(0, 0.478, 0.905, 1)  # #007ae7 color
-            RoundedRectangle(pos=self.pos, size=Window.size)
+            self.bg_rect = RoundedRectangle(pos=self.pos, size=Window.size)
         
-        # Display shutdown message with countdown
+        # Display shutdown message with border
+        with self.canvas:
+            Color(1, 1, 1, 1)
+            self.shutdown_rect = RoundedRectangle(
+                size=(Window.width * 0.6, Window.height * 0.2),
+                pos=(Window.width * 0.2, Window.height * 0.4),
+                radius=[20]
+            )
+            Color(0, 0, 0, 1)
+            Line(
+                rounded_rectangle=(
+                    Window.width * 0.2, Window.height * 0.4,
+                    Window.width * 0.6, Window.height * 0.2, 20
+                ),
+                width=2
+            )
+        
         self.countdown_label = Label(
             text="Shutting down in 5",
             font_size='30sp',
             size_hint=(None, None),
-            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+            size=(Window.width * 0.6, Window.height * 0.2),
+            pos=(Window.width * 0.2, Window.height * 0.4),
+            color=(0, 0, 0, 1)
         )
         self.add_widget(self.countdown_label)
         
@@ -171,12 +195,12 @@ class MenuScreen(Screen):
         # Background color
         with self.canvas.before:
             Color(0, 0.478, 0.905, 1)  # #007ae7 color
-            RoundedRectangle(pos=self.pos, size=Window.size)
+            self.bg_rect = RoundedRectangle(pos=self.pos, size=Window.size)
         
         # Heating Rectangle at the top
         with self.canvas:
             Color(0.694, 0.714, 0.788, 1)  # #b1b6c9 color
-            RoundedRectangle(
+            self.heating_rect = RoundedRectangle(
                 pos=(Window.width * 0.4, Window.height * 0.92),
                 size=(Window.width * 0.2, Window.height * 0.08),
                 radius=[(0, 0), (0, 0), (15, 15), (15, 15)]
@@ -236,32 +260,37 @@ class MenuScreen(Screen):
         button_layout.add_widget(maintenance_button)
         layout.add_widget(button_layout)
         
-        # Bottom buttons (Back and OFF)
+        # Bottom buttons (Back and OFF) with spacing and padding
         bottom_layout = BoxLayout(
+            orientation='horizontal',
             size_hint=(1, 0.1),
-            pos_hint={'y': 0}
+            pos_hint={'y': 0},
+            spacing=10,
+            padding=[10, 0, 10, 10]
         )
         back_button = Button(
             text="BACK",
-            font_size='20sp',
             background_color=(0.008, 0.408, 0.78, 1),
             background_normal='',
-            color=(1, 1, 1, 1)
+            background_down='',
+            color=(1, 1, 1, 1),
+            font_size='20sp'
         )
         back_button.bind(on_press=self.go_back)
         bottom_layout.add_widget(back_button)
         
         off_button = Button(
             text="OFF",
-            font_size='20sp',
             background_color=(0.008, 0.408, 0.78, 1),
             background_normal='',
-            color=(1, 1, 1, 1)
+            background_down='',
+            color=(1, 1, 1, 1),
+            font_size='20sp'
         )
         off_button.bind(on_press=self.shutdown_sequence)
         bottom_layout.add_widget(off_button)
         layout.add_widget(bottom_layout)
-
+    
         self.add_widget(layout)
 
         # Schedule heating label updates
@@ -269,31 +298,49 @@ class MenuScreen(Screen):
     
     def update_heating_label(self, dt):
         self.heating_label.text = "Heating: OFF" if not heating_state else "Heating: ON"
-
+    
     def go_back(self, instance):
         self.manager.transition = SlideTransition(direction="down")
         self.manager.current = 'main_menu'
-
+    
     def open_settings(self, instance):
         self.manager.transition = SlideTransition(direction="left")
         self.manager.current = 'settings'
-
+    
     def shutdown_sequence(self, instance):
         self.clear_widgets()
+        self.canvas.clear()
         with self.canvas.before:
-            Color(0, 0.478, 0.905, 1)  # #007ae7 color
-            RoundedRectangle(pos=self.pos, size=Window.size)
+            Color(0, 0.478, 0.905, 1)
+            self.bg_rect = RoundedRectangle(pos=self.pos, size=Window.size)
         
-        # Display shutdown message with countdown
+        # Display shutdown message with border
+        with self.canvas:
+            Color(1, 1, 1, 1)
+            self.shutdown_rect = RoundedRectangle(
+                size=(Window.width * 0.6, Window.height * 0.2),
+                pos=(Window.width * 0.2, Window.height * 0.4),
+                radius=[20]
+            )
+            Color(0, 0, 0, 1)
+            Line(
+                rounded_rectangle=(
+                    Window.width * 0.2, Window.height * 0.4,
+                    Window.width * 0.6, Window.height * 0.2, 20
+                ),
+                width=2
+            )
+        
         self.countdown_label = Label(
             text="Shutting down in 5",
             font_size='30sp',
             size_hint=(None, None),
-            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+            size=(Window.width * 0.6, Window.height * 0.2),
+            pos=(Window.width * 0.2, Window.height * 0.4),
+            color=(0, 0, 0, 1)
         )
         self.add_widget(self.countdown_label)
         
-        # Start countdown
         self.countdown = 5
         Clock.schedule_interval(self.update_countdown, 1)
     
@@ -312,13 +359,13 @@ class SettingsScreen(Screen):
         
         # Background color
         with self.canvas.before:
-            Color(0, 0.478, 0.905, 1)  # #007ae7 color
-            RoundedRectangle(pos=self.pos, size=Window.size)
+            Color(0, 0.478, 0.905, 1)
+            self.bg_rect = RoundedRectangle(pos=self.pos, size=Window.size)
         
         # Heating Rectangle at the top
         with self.canvas:
-            Color(0.694, 0.714, 0.788, 1)  # #b1b6c9 color
-            RoundedRectangle(
+            Color(0.694, 0.714, 0.788, 1)
+            self.heating_rect = RoundedRectangle(
                 pos=(Window.width * 0.4, Window.height * 0.92),
                 size=(Window.width * 0.2, Window.height * 0.08),
                 radius=[(0, 0), (0, 0), (15, 15), (15, 15)]
@@ -372,32 +419,37 @@ class SettingsScreen(Screen):
         ))
         layout.add_widget(button_layout)
         
-        # Bottom buttons (Back and OFF)
+        # Bottom buttons (Back and OFF) with spacing and padding
         bottom_layout = BoxLayout(
+            orientation='horizontal',
             size_hint=(1, 0.1),
-            pos_hint={'y': 0}
+            pos_hint={'y': 0},
+            spacing=10,
+            padding=[10, 0, 10, 10]
         )
         back_button = Button(
             text="BACK",
-            font_size='20sp',
             background_color=(0.008, 0.408, 0.78, 1),
             background_normal='',
-            color=(1, 1, 1, 1)
+            background_down='',
+            color=(1, 1, 1, 1),
+            font_size='20sp'
         )
         back_button.bind(on_press=self.go_back)
         bottom_layout.add_widget(back_button)
         
         off_button = Button(
             text="OFF",
-            font_size='20sp',
             background_color=(0.008, 0.408, 0.78, 1),
             background_normal='',
-            color=(1, 1, 1, 1)
+            background_down='',
+            color=(1, 1, 1, 1),
+            font_size='20sp'
         )
         off_button.bind(on_press=self.shutdown_sequence)
         bottom_layout.add_widget(off_button)
         layout.add_widget(bottom_layout)
-
+    
         self.add_widget(layout)
 
         # Schedule heating label updates
@@ -405,27 +457,45 @@ class SettingsScreen(Screen):
     
     def update_heating_label(self, dt):
         self.heating_label.text = "Heating: OFF" if not heating_state else "Heating: ON"
-
+    
     def go_back(self, instance):
         self.manager.transition = SlideTransition(direction="right")
         self.manager.current = 'menu'
-
+    
     def shutdown_sequence(self, instance):
         self.clear_widgets()
+        self.canvas.clear()
         with self.canvas.before:
-            Color(0, 0.478, 0.905, 1)  # #007ae7 color
-            RoundedRectangle(pos=self.pos, size=Window.size)
+            Color(0, 0.478, 0.905, 1)
+            self.bg_rect = RoundedRectangle(pos=self.pos, size=Window.size)
         
-        # Display shutdown message with countdown
+        # Display shutdown message with border
+        with self.canvas:
+            Color(1, 1, 1, 1)
+            self.shutdown_rect = RoundedRectangle(
+                size=(Window.width * 0.6, Window.height * 0.2),
+                pos=(Window.width * 0.2, Window.height * 0.4),
+                radius=[20]
+            )
+            Color(0, 0, 0, 1)
+            Line(
+                rounded_rectangle=(
+                    Window.width * 0.2, Window.height * 0.4,
+                    Window.width * 0.6, Window.height * 0.2, 20
+                ),
+                width=2
+            )
+        
         self.countdown_label = Label(
             text="Shutting down in 5",
             font_size='30sp',
             size_hint=(None, None),
-            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+            size=(Window.width * 0.6, Window.height * 0.2),
+            pos=(Window.width * 0.2, Window.height * 0.4),
+            color=(0, 0, 0, 1)
         )
         self.add_widget(self.countdown_label)
         
-        # Start countdown
         self.countdown = 5
         Clock.schedule_interval(self.update_countdown, 1)
     
@@ -445,12 +515,12 @@ class ExtraMenuScreen(Screen):
         # Background color
         with self.canvas.before:
             Color(0, 0.478, 0.905, 1)
-            RoundedRectangle(pos=self.pos, size=Window.size)
+            self.bg_rect = RoundedRectangle(pos=self.pos, size=Window.size)
         
         # Heating Rectangle at the top
         with self.canvas:
             Color(0.694, 0.714, 0.788, 1)
-            RoundedRectangle(
+            self.heating_rect = RoundedRectangle(
                 pos=(Window.width * 0.4, Window.height * 0.92),
                 size=(Window.width * 0.2, Window.height * 0.08),
                 radius=[(0, 0), (0, 0), (15, 15), (15, 15)]
@@ -497,32 +567,37 @@ class ExtraMenuScreen(Screen):
         ))
         layout.add_widget(button_layout)
         
-        # Bottom buttons (Back and OFF)
+        # Bottom buttons (Back and OFF) with spacing and padding
         bottom_layout = BoxLayout(
+            orientation='horizontal',
             size_hint=(1, 0.1),
-            pos_hint={'y': 0}
+            pos_hint={'y': 0},
+            spacing=10,
+            padding=[10, 0, 10, 10]
         )
         back_button = Button(
             text="BACK",
-            font_size='20sp',
             background_color=(0.008, 0.408, 0.78, 1),
             background_normal='',
-            color=(1, 1, 1, 1)
+            background_down='',
+            color=(1, 1, 1, 1),
+            font_size='20sp'
         )
         back_button.bind(on_press=self.go_back)
         bottom_layout.add_widget(back_button)
         
         off_button = Button(
             text="OFF",
-            font_size='20sp',
             background_color=(0.008, 0.408, 0.78, 1),
             background_normal='',
-            color=(1, 1, 1, 1)
+            background_down='',
+            color=(1, 1, 1, 1),
+            font_size='20sp'
         )
         off_button.bind(on_press=self.shutdown_sequence)
         bottom_layout.add_widget(off_button)
         layout.add_widget(bottom_layout)
-
+    
         self.add_widget(layout)
 
         # Schedule heating label updates
@@ -530,22 +605,42 @@ class ExtraMenuScreen(Screen):
     
     def update_heating_label(self, dt):
         self.heating_label.text = "Heating: OFF" if not heating_state else "Heating: ON"
-
+    
     def go_back(self, instance):
         self.manager.transition = SlideTransition(direction="right")
         self.manager.current = 'main_menu'
-
+    
     def shutdown_sequence(self, instance):
         self.clear_widgets()
+        self.canvas.clear()
         with self.canvas.before:
             Color(0, 0.478, 0.905, 1)
-            RoundedRectangle(pos=self.pos, size=Window.size)
+            self.bg_rect = RoundedRectangle(pos=self.pos, size=Window.size)
+        
+        # Display shutdown message with border
+        with self.canvas:
+            Color(1, 1, 1, 1)
+            self.shutdown_rect = RoundedRectangle(
+                size=(Window.width * 0.6, Window.height * 0.2),
+                pos=(Window.width * 0.2, Window.height * 0.4),
+                radius=[20]
+            )
+            Color(0, 0, 0, 1)
+            Line(
+                rounded_rectangle=(
+                    Window.width * 0.2, Window.height * 0.4,
+                    Window.width * 0.6, Window.height * 0.2, 20
+                ),
+                width=2
+            )
         
         self.countdown_label = Label(
             text="Shutting down in 5",
             font_size='30sp',
             size_hint=(None, None),
-            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+            size=(Window.width * 0.6, Window.height * 0.2),
+            pos=(Window.width * 0.2, Window.height * 0.4),
+            color=(0, 0, 0, 1)
         )
         self.add_widget(self.countdown_label)
         
