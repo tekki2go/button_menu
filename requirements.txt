@@ -1,5 +1,3 @@
 PyYAML
-pigpio
 kivy[full]
-kivymd
 kivy_garden.drag_n_drop
