@@ -4,9 +4,12 @@ from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.scrollview import ScrollView
 from kivy.graphics import Color, RoundedRectangle, Line
 from kivy.core.window import Window
 from kivy.clock import Clock
+import yaml
+import os
 
 # Global variable for heating state
 heating_state = False
@@ -512,6 +515,9 @@ class ExtraMenuScreen(Screen):
         super(ExtraMenuScreen, self).__init__(**kwargs)
         layout = FloatLayout()
         
+        # Load actions from YAML files
+        self.load_actions()
+        
         # Background color
         with self.canvas.before:
             Color(0, 0.478, 0.905, 1)
@@ -544,30 +550,33 @@ class ExtraMenuScreen(Screen):
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
             spacing=40
         )
-        button_layout.add_widget(Button(
+        self.button_c1 = Button(
             text="C1",
             font_size='24sp',
             background_color=(0.008, 0.408, 0.78, 1),
             background_normal='',
             color=(1, 1, 1, 1)
-        ))
-        button_layout.add_widget(Button(
+        )
+        self.button_c2 = Button(
             text="C2",
             font_size='24sp',
             background_color=(0.008, 0.408, 0.78, 1),
             background_normal='',
             color=(1, 1, 1, 1)
-        ))
-        button_layout.add_widget(Button(
+        )
+        self.button_c3 = Button(
             text="C3",
             font_size='24sp',
             background_color=(0.008, 0.408, 0.78, 1),
             background_normal='',
             color=(1, 1, 1, 1)
-        ))
+        )
+        button_layout.add_widget(self.button_c1)
+        button_layout.add_widget(self.button_c2)
+        button_layout.add_widget(self.button_c3)
         layout.add_widget(button_layout)
         
-        # Bottom buttons (Back and OFF) with spacing and padding
+        # Bottom buttons (Back, OFF, and SHOW ACTIONS)
         bottom_layout = BoxLayout(
             orientation='horizontal',
             size_hint=(1, 0.1),
@@ -596,12 +605,36 @@ class ExtraMenuScreen(Screen):
         )
         off_button.bind(on_press=self.shutdown_sequence)
         bottom_layout.add_widget(off_button)
+        
+        show_actions_button = Button(
+            text="SHOW ACTIONS",
+            background_color=(0.008, 0.408, 0.78, 1),
+            background_normal='',
+            background_down='',
+            color=(1, 1, 1, 1),
+            font_size='20sp'
+        )
+        show_actions_button.bind(on_press=self.show_actions)
+        bottom_layout.add_widget(show_actions_button)
         layout.add_widget(bottom_layout)
     
         self.add_widget(layout)
-
+    
         # Schedule heating label updates
         Clock.schedule_interval(self.update_heating_label, 1)
+    
+    def load_actions(self):
+        self.button_actions = {}
+        config_dir = 'config'
+        for i in range(1, 4):
+            filename = f'c{i}.yaml'
+            filepath = os.path.join(config_dir, filename)
+            if os.path.exists(filepath):
+                with open(filepath, 'r') as file:
+                    data = yaml.safe_load(file)
+                    self.button_actions[f'C{i}'] = data.get('actions', [])
+            else:
+                self.button_actions[f'C{i}'] = []
     
     def update_heating_label(self, dt):
         self.heating_label.text = "Heating: OFF" if not heating_state else "Heating: ON"
@@ -654,6 +687,113 @@ class ExtraMenuScreen(Screen):
         else:
             App.get_running_app().stop()
             Window.close()
+    
+    def show_actions(self, instance):
+        # Navigate to ShowActionsScreen
+        self.manager.transition = SlideTransition(direction="left")
+        if not self.manager.has_screen('show_actions'):
+            self.manager.add_widget(ShowActionsScreen(self.button_actions, name='show_actions'))
+        self.manager.current = 'show_actions'
+
+class ShowActionsScreen(Screen):
+    def __init__(self, button_actions, **kwargs):
+        super(ShowActionsScreen, self).__init__(**kwargs)
+        self.button_actions = button_actions
+        
+        layout = FloatLayout()
+        
+        # Background color
+        with self.canvas.before:
+            Color(0, 0.478, 0.905, 1)
+            self.bg_rect = RoundedRectangle(pos=self.pos, size=Window.size)
+        
+        # Scrollable area for actions
+        scroll_view = ScrollView(
+            size_hint=(1, 0.85),
+            pos_hint={'x': 0, 'top': 0.95}
+        )
+        content = BoxLayout(
+            orientation='vertical',
+            size_hint_y=None,
+            spacing=10,
+            padding=10
+        )
+        content.bind(minimum_height=content.setter('height'))
+        
+        for button_name in sorted(self.button_actions.keys()):
+            actions = self.button_actions[button_name]
+            # Display button name
+            button_label = Label(
+                text=f"[b]{button_name} Actions:[/b]",
+                markup=True,
+                font_size='24sp',
+                size_hint_y=None,
+                height=40,
+                color=(1, 1, 1, 1)
+            )
+            content.add_widget(button_label)
+            # Display actions
+            for action in actions:
+                action_text = self.parse_action(action)
+                action_label = Label(
+                    text=action_text,
+                    font_size='20sp',
+                    size_hint_y=None,
+                    height=30,
+                    color=(1, 1, 1, 1)
+                )
+                content.add_widget(action_label)
+            # Add a separator
+            separator = Label(
+                text="",
+                size_hint_y=None,
+                height=20
+            )
+            content.add_widget(separator)
+        
+        scroll_view.add_widget(content)
+        layout.add_widget(scroll_view)
+        
+        # Bottom buttons (Back)
+        bottom_layout = BoxLayout(
+            orientation='horizontal',
+            size_hint=(1, 0.1),
+            pos_hint={'y': 0},
+            padding=[10, 0, 10, 10]
+        )
+        back_button = Button(
+            text="BACK",
+            background_color=(0.008, 0.408, 0.78, 1),
+            background_normal='',
+            background_down='',
+            color=(1, 1, 1, 1),
+            font_size='20sp'
+        )
+        back_button.bind(on_press=self.go_back)
+        bottom_layout.add_widget(back_button)
+        layout.add_widget(bottom_layout)
+        
+        self.add_widget(layout)
+    
+    def parse_action(self, action):
+        action_type = action.get('type', '').capitalize()
+        if action_type == 'Start':
+            device = action.get('device', 'Unknown')
+            level = action.get('level', 'Unknown')
+            return f"Start {device} at {level} level."
+        elif action_type == 'Stop':
+            device = action.get('device', 'Unknown')
+            return f"Stop {device}."
+        elif action_type == 'Delay':
+            amount = action.get('amount', 'Unknown')
+            unit = action.get('unit', 'Unknown')
+            return f"Delay for {amount} {unit}."
+        else:
+            return "Unknown action."
+    
+    def go_back(self, instance):
+        self.manager.transition = SlideTransition(direction="right")
+        self.manager.current = 'extra_menu'
 
 class MyApp(App):
     def build(self):
@@ -662,6 +802,7 @@ class MyApp(App):
         sm.add_widget(MenuScreen(name='menu'))
         sm.add_widget(SettingsScreen(name='settings'))
         sm.add_widget(ExtraMenuScreen(name='extra_menu'))
+        # Note: ShowActionsScreen is added dynamically when needed
 
         return sm
 
